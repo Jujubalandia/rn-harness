@@ -5,6 +5,8 @@ description: Wizard interativo para inicializar um novo projeto React Native com
 
 # New RN Project — Wizard
 
+> Skill instalada em `~/.claude/skills/new-rn-project/` pelo `install.sh` do rn-harness.
+
 ## Quando invocar
 
 Usuário está em um diretório novo (sem CLAUDE.md) e quer iniciar um app React Native + Expo + Supabase pronto para lançar em 20 dias.
