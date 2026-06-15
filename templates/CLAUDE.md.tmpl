@@ -1,0 +1,114 @@
+# CLAUDE.md — {{APP_NAME}}
+
+## Projeto
+
+{{DESCRICAO_UMA_LINHA}}
+React Native + Expo + TypeScript + Supabase.
+Target: 20 dias. Foco: {{FOCO_PRINCIPAL}}.
+Lançamento: {{IDIOMAS — ex: PT-BR / EN-US}}.
+
+## Stack
+
+- Expo SDK 56, Expo Router (file-based routing)
+- TypeScript strict, sem `any`
+- Supabase (auth, Postgres, Edge Functions, RLS ativada)
+- Zustand para state management
+- expo-secure-store para tokens/dados sensíveis
+- react-native-reanimated v3 para animações
+- i18next + react-i18next + expo-localization para multilíngue
+- expo-haptics para feedback tátil
+{{LIBS_ADICIONAIS — ex: react-native-skia, expo-camera, etc.}}
+
+## Convenções de código
+
+- Functional components + hooks (NUNCA classes)
+- Custom hooks em `/hooks`, services em `/services`, componentes em `/components/<feature>/`
+- Types em `/lib/types.ts`
+- Arquivos: `PascalCase` para componentes, `camelCase` para utils/services
+- **i18n obrigatório desde v0**. NUNCA hardcodar string em componente — sempre `t('chave.especifica')` ou `<Trans i18nKey="..."/>`. Chaves em inglês snake_case. Plurais via CLDR. Datas/números via `Intl.*` com locale do `useTranslation().i18n.language`.
+- Estilo via StyleSheet.create (sem valores hardcoded de cor/espaçamento — usar design tokens)
+- Custom hooks para TODA lógica de negócio (useAuth, use{{DOMINIO}}, etc.)
+- Barrel exports via index.ts em cada pasta de feature
+- Error boundaries no nível de rota no mínimo
+
+## Types principais
+
+```typescript
+// Preencher com os tipos do domínio
+// Exemplo:
+// type User = { id: string; email: string; display_name: string }
+// type {{ENTIDADE_PRINCIPAL}} = { id: string; user_id: string; status: 'draft' | 'active' }
+{{TIPOS_DO_DOMINIO}}
+```
+
+## Database
+
+PostgreSQL via Supabase. Tabelas principais:
+```
+{{TABELAS_PRINCIPAIS — ex: profiles, items, orders}}
+```
+RLS ativada em todas. Migrations em `supabase/migrations/`.
+
+## Regras inegociáveis
+
+- ❌ API keys NUNCA hardcoded — usar `.env` local + EAS Secrets em prod
+- ❌ Tokens de auth em `expo-secure-store`, NUNCA `AsyncStorage`
+- ❌ Prompts de IA NUNCA no app — sempre em Edge Function no Supabase
+- ❌ Sem dependências novas sem perguntar (afeta bundle size)
+{{REGRAS_DO_DOMINIO — ex: "❌ Nunca exibir dados de outros usuários sem RLS"}}\
+- ✅ Mobile-first: tudo operável com polegar (toques ≥ 44pt)
+- ✅ Haptic feedback em interações de seleção
+- ✅ `accessibilityLabel` em todo elemento interativo (i18n!)
+
+## Cadência de commit
+
+- Mensagens em inglês, formato `tipo(escopo): descrição` (conventional commits)
+- Tipos: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `style`
+- 1 commit = 1 mudança lógica completa (não commitar código quebrado)
+- NUNCA usar `--no-verify`
+
+## Quality gates (inegociáveis)
+
+- `tsc --noEmit` zero erros antes de commitar
+- ESLint `--max-warnings 0`
+- Prettier `--check` clean
+- FTA score < 60 por arquivo
+- Antes de push: `pnpm quality:full`
+- Antes de build production: `pnpm preflight` + Golden Paths manuais
+
+## Ambiente de execução
+
+- Editor: {{EDITOR — ex: Zed, VS Code}}
+- Shell: {{SHELL — ex: PowerShell Windows, bash WSL}}
+- Android físico na mesma rede WiFi — Metro via IP LAN
+- iOS: smoke via Appetize.io (grátis) + device emprestado para TestFlight
+- Idioma das respostas: **Português-BR** (código e commits em inglês)
+
+## Como me invocar
+
+- Skills: `/<skill>` (ver `~/.claude/templates/rn-20days/SKILLS.md`)
+- Pesquisa ampla no código: subagente `Explore`
+- Planejar não-trivial: `/plan` mode
+- Revisar metadata de loja: subagente `store-metadata-reviewer`
+- Copy de marketing: subagente `marketing-copywriter`
+
+## Docs do projeto
+
+- `docs/01-spec.md` — spec + pesquisa de mercado
+- `docs/02-dev-plan.md` — plano 20 dias + milestones
+- `docs/03-quality-gates.md` — checklist de qualidade
+- `docs/04-testing.md` — plano de testes
+- `docs/05-store-launch.md` — checklist de lojas
+- `docs/06-marketing.md` — calendário de marketing
+- `TODO.md` — backlog ativo
+- `DECISIONS.md` — ADRs
+
+## Não faça
+
+- Não rode `eas submit` sem confirmação do usuário
+- Não rode `supabase db reset --linked` (destrutivo em prod)
+- Não force-push, nunca
+- Não crie arquivos `.md` a menos que solicitado
+- Não escreva comentários explicativos no código (só o "porquê" não-óbvio)
+- Não rode migrations diretamente em prod
+- Não traduza strings de UI manualmente — usar `/i18n-add-key`

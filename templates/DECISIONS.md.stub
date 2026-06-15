@@ -1,0 +1,20 @@
+# DECISIONS.md — {{APP_NAME}}
+
+Registro de decisões de arquitetura, estrutura e features.
+Formato: data ISO + contexto + decisão + motivo + alternativas rejeitadas.
+
+---
+
+## ADR-001 — Stack principal
+
+**Data:** {{DATA_INICIO}}
+**Status:** Aceito
+
+**Decisão:** Expo SDK 56 + Expo Router + TypeScript strict + Supabase + Zustand.
+
+**Motivo:** SDK 56 LTS com suporte a New Architecture. Expo Router elimina config manual de navegação. Supabase cobre auth + DB + Edge Functions sem backend próprio. Zustand é minimal.
+
+**Alternativas rejeitadas:**
+- React Navigation standalone: mais flexível mas mais boilerplate
+- Firebase: lock-in de vendor, custo imprevisível em escala
+- Redux: boilerplate excessivo para MVP

@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+# rn-harness installer
+#
+# Uso:
+#   curl -fsSL https://raw.githubusercontent.com/jujubalandia/rn-harness/main/install.sh | sh
+#
+#   ou clone manual:
+#   git clone git@github.com:jujubalandia/rn-harness.git ~/.rn-harness && ~/.rn-harness/install.sh
+
+set -e
+
+HARNESS_DIR="${RN_HARNESS_DIR:-$HOME/.rn-harness}"
+CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+TEMPLATES_DEST="$CLAUDE_DIR/templates/rn-20days"
+SKILLS_DEST="$CLAUDE_DIR/skills"
+FORCE="${1:-}"
+
+echo "rn-harness installer"
+echo "===================="
+echo ""
+
+# --- 1. Obter o repo ---
+
+if [ -d "$HARNESS_DIR/.git" ]; then
+  echo "→ Atualizando $HARNESS_DIR..."
+  git -C "$HARNESS_DIR" pull --ff-only --quiet
+else
+  # Se rodando via curl | sh, o repo ainda não existe localmente
+  # Tentar clonar. Se não tiver acesso SSH, instruir o usuário.
+  if git ls-remote git@github.com:jujubalandia/rn-harness.git HEAD >/dev/null 2>&1; then
+    echo "→ Clonando rn-harness em $HARNESS_DIR..."
+    git clone --quiet git@github.com:jujubalandia/rn-harness.git "$HARNESS_DIR"
+  else
+    echo "❌ Sem acesso ao repo git@github.com:jujubalandia/rn-harness.git"
+    echo "   Clone manualmente:"
+    echo "   git clone git@github.com:jujubalandia/rn-harness.git $HARNESS_DIR"
+    echo "   $HARNESS_DIR/install.sh"
+    exit 1
+  fi
+fi
+
+# --- 2. Templates → ~/.claude/templates/rn-20days/ ---
+
+mkdir -p "$TEMPLATES_DEST/docs"
+
+if [ "$FORCE" = "--force" ]; then
+  echo "→ Copiando templates (--force: sobrescrevendo)..."
+  cp -rf "$HARNESS_DIR/templates/." "$TEMPLATES_DEST/"
+else
+  echo "→ Copiando templates (pula arquivos existentes)..."
+  cp -rn "$HARNESS_DIR/templates/." "$TEMPLATES_DEST/" 2>/dev/null || true
+fi
+
+# --- 3. Skill new-rn-project → ~/.claude/skills/ ---
+
+if [ -d "$SKILLS_DEST/new-rn-project" ] && [ "$FORCE" != "--force" ]; then
+  echo "→ Skill new-rn-project já existe (pular — use --force para atualizar)"
+else
+  echo "→ Instalando skill new-rn-project..."
+  mkdir -p "$SKILLS_DEST"
+  if [ "$FORCE" = "--force" ]; then
+    cp -rf "$HARNESS_DIR/skills/new-rn-project/" "$SKILLS_DEST/new-rn-project/"
+  else
+    cp -rn "$HARNESS_DIR/skills/new-rn-project/" "$SKILLS_DEST/new-rn-project/"
+  fi
+fi
+
+# --- 4. Resultado ---
+
+echo ""
+echo "✅ rn-harness instalado"
+echo "   Repo:      $HARNESS_DIR"
+echo "   Templates: $TEMPLATES_DEST"
+echo "   Skill:     $SKILLS_DEST/new-rn-project"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "PRÓXIMOS PASSOS"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "1. Novo projeto:"
+echo "   mkdir ~/projects/meu-app && cd ~/projects/meu-app"
+echo "   claude  ← abrir Claude Code e digitar /new-rn-project"
+echo ""
+echo "2. Skills de marketplace (instalar se ainda não tiver):"
+echo "   Abrir Claude Code e verificar com /find-skills ou:"
+echo "   - react-native-best-practices  (callstack marketplace)"
+echo "   - zafer-skills                 (thedotmack marketplace)"
+echo "   - expo-debugger, design-token-guardian, i18n-validator"
+echo "   - store-metadata-reviewer, qa-tester"
+echo "   - marketing-copywriter, viral-content-strategist"
+echo "   - supabase-migrator"
+echo ""
+echo "3. Atualizar depois:"
+echo "   $HARNESS_DIR/install.sh           ← atualiza sem sobrescrever"
+echo "   $HARNESS_DIR/install.sh --force   ← força atualização dos templates"
+echo ""

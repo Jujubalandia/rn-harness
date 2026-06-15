@@ -1,0 +1,48 @@
+# TODO.md — {{APP_NAME}}
+
+> Última atualização: {{DATA_INICIO}}
+> Formato: GitHub Task List. Itens `[x]` ficam visíveis 24h depois movem para ✅ FEITO.
+
+## 🔥 BLOQUEADORES (resolver hoje)
+
+- [ ] **D1** AGENDAR empréstimo de iPhone para D17-D18 — contato + horários aqui 🔥
+
+## 🎯 D1-D3 — Spec + Setup
+
+- [ ] Preencher `docs/01-spec.md` completamente
+- [ ] Setup Supabase: criar projeto + configurar `.env`
+- [ ] `npx create-expo-app` + instalar deps base
+- [ ] Auth funcionando (Google/Apple)
+- [ ] Navegação entre 2 telas principais
+- [ ] **M1 DoD:** login funciona no Android físico
+
+## 🎯 D4-D10 — Core Features
+
+- [ ] {{FEATURE_1}}
+- [ ] {{FEATURE_2}}
+- [ ] {{FEATURE_3}}
+
+## 🎯 D11-D13 — Polish
+
+- [ ] i18n completo (todas as strings)
+- [ ] Loading + error states em todas as telas
+- [ ] `pnpm quality:full` passando
+
+## 🎯 D14-D15 — QA + Store Prep
+
+- [ ] EAS build produção Android + iOS
+- [ ] Screenshots para lojas capturadas
+- [ ] Metadata lojas preenchida (`docs/05-store-launch.md`)
+
+## 🎯 D16-D17 — Submissão
+
+- [ ] Google Play: upload AAB → produção
+- [ ] App Store: EAS submit → review
+
+## 🎯 D18-D20 — Marketing
+
+- [ ] Landing page no ar
+- [ ] Posts D0 preparados (`docs/06-marketing.md`)
+- [ ] Product Hunt listing criado
+
+## ✅ FEITO (últimos 7 dias)
