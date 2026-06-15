@@ -149,5 +149,5 @@ Se os templates não existirem (harness não instalado), avisar:
 ```
 ❌ Templates não encontrados em ~/.claude/templates/rn-20days/
    Instalar o rn-harness primeiro:
-   curl -fsSL https://raw.githubusercontent.com/jujubalandia/rn-harness/main/install.sh | sh
+   curl -fsSL https://raw.githubusercontent.com/Jujubalandia/rn-harness/main/install.sh | sh
 ```

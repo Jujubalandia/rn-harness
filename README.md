@@ -32,13 +32,13 @@ O coração é a skill `/new-rn-project`: você abre um diretório vazio, digita
 ## Instalação
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jujubalandia/rn-harness/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/Jujubalandia/rn-harness/main/install.sh | sh
 ```
 
 Ou manual (repo privado — requer acesso SSH):
 
 ```bash
-git clone git@github.com:jujubalandia/rn-harness.git ~/.rn-harness
+git clone git@github.com:Jujubalandia/rn-harness.git ~/.rn-harness
 ~/.rn-harness/install.sh
 ```
 

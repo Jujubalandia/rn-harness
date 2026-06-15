@@ -27,13 +27,13 @@ if [ -d "$HARNESS_DIR/.git" ]; then
 else
   # Se rodando via curl | sh, o repo ainda não existe localmente
   # Tentar clonar. Se não tiver acesso SSH, instruir o usuário.
-  if git ls-remote git@github.com:jujubalandia/rn-harness.git HEAD >/dev/null 2>&1; then
+  if git ls-remote git@github.com:Jujubalandia/rn-harness.git HEAD >/dev/null 2>&1; then
     echo "→ Clonando rn-harness em $HARNESS_DIR..."
-    git clone --quiet git@github.com:jujubalandia/rn-harness.git "$HARNESS_DIR"
+    git clone --quiet git@github.com:Jujubalandia/rn-harness.git "$HARNESS_DIR"
   else
     echo "❌ Sem acesso ao repo git@github.com:jujubalandia/rn-harness.git"
     echo "   Clone manualmente:"
-    echo "   git clone git@github.com:jujubalandia/rn-harness.git $HARNESS_DIR"
+    echo "   git clone git@github.com:Jujubalandia/rn-harness.git $HARNESS_DIR"
     echo "   $HARNESS_DIR/install.sh"
     exit 1
   fi
