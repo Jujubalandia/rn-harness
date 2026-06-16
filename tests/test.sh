@@ -98,6 +98,12 @@ assert_exec "$REPO_DIR/uninstall.sh"                          "uninstall.sh exec
 assert_exec "$REPO_DIR/hooks/pre-commit.sh"                   "pre-commit.sh executável"
 assert_exec "$REPO_DIR/hooks/pre-push.sh"                     "pre-push.sh executável"
 
+assert_file "$REPO_DIR/install.ps1"                           "install.ps1"
+assert_file "$REPO_DIR/uninstall.ps1"                         "uninstall.ps1"
+assert_file "$REPO_DIR/hooks/pre-commit.ps1"                  "hooks/pre-commit.ps1"
+assert_file "$REPO_DIR/hooks/pre-push.ps1"                    "hooks/pre-push.ps1"
+assert_file "$REPO_DIR/tests/test.ps1"                        "tests/test.ps1"
+
 for prefix in "01" "02" "03" "04" "05" "06"; do
   found=0
   for f in "$REPO_DIR/templates/docs/${prefix}-"*.md; do

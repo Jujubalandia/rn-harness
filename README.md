@@ -48,6 +48,55 @@ O installer coloca:
 
 ---
 
+---
+
+## Windows (PowerShell)
+
+Requer PowerShell 5.1+ (pré-instalado no Windows 10+) e Git for Windows.
+
+### Instalação
+
+```powershell
+# Clone manual (repo privado — requer acesso SSH):
+git clone git@github.com:Jujubalandia/rn-harness.git $env:USERPROFILE\.rn-harness
+& "$env:USERPROFILE\.rn-harness\install.ps1"
+```
+
+### Atualizar
+
+```powershell
+& "$env:USERPROFILE\.rn-harness\install.ps1"          # sem sobrescrever
+& "$env:USERPROFILE\.rn-harness\install.ps1" -Force   # forca update dos templates
+```
+
+### Desinstalar
+
+```powershell
+& "$env:USERPROFILE\.rn-harness\uninstall.ps1"
+```
+
+### Git hooks no Windows
+
+Os hooks `.sh` funcionam via Git for Windows (bash embutido) — nenhuma configuração extra.
+Os `.ps1` em `hooks/` servem para testes e invocação manual no PowerShell.
+
+### Testar suite PowerShell
+
+```powershell
+powershell -File "$env:USERPROFILE\.rn-harness\tests\test.ps1"
+```
+
+### Variaveis de ambiente (equivalentes)
+
+| Bash | PowerShell |
+|------|-----------|
+| `RN_HARNESS_DIR` | `$env:RN_HARNESS_DIR` |
+| `CLAUDE_CONFIG_DIR` | `$env:CLAUDE_CONFIG_DIR` |
+| `HARNESS_REMOTE` | `$env:HARNESS_REMOTE` |
+| `HARNESS_CONFIRM` | `$env:HARNESS_CONFIRM` (uninstall sem prompt) |
+| `HARNESS_ANDROID_OK` | `$env:HARNESS_ANDROID_OK` (pre-push sem prompt) |
+
+
 ## Uso — Novo Projeto
 
 ```bash
