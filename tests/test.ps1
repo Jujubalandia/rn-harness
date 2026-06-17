@@ -81,13 +81,15 @@ if ($LASTEXITCODE -ne 0) { throw "git clone --bare falhou" }
 
 # ── funcoes de invocacao (sempre em processo filho) ───────────────────────────
 
-function Invoke-Install([switch]$Force) {
+function Invoke-Install([switch]$Force, [string]$ProfileArg = "") {
     $env:RN_HARNESS_DIR    = $TestHarness
     $env:CLAUDE_CONFIG_DIR = $TestClaude
     $env:HARNESS_REMOTE    = $TestRemote
     try {
         if ($Force) {
             powershell -NoProfile -File "$RepoDir\install.ps1" -Force *>$null
+        } elseif ($ProfileArg) {
+            powershell -NoProfile -File "$RepoDir\install.ps1" -Profile $ProfileArg *>$null
         } else {
             powershell -NoProfile -File "$RepoDir\install.ps1" *>$null
         }
@@ -137,6 +139,14 @@ Assert-File "$RepoDir\hooks\pre-push.sh"                      "hooks\pre-push.sh
 Assert-File "$RepoDir\hooks\pre-commit.ps1"                   "hooks\pre-commit.ps1"
 Assert-File "$RepoDir\hooks\pre-push.ps1"                     "hooks\pre-push.ps1"
 Assert-File "$RepoDir\tests\test.ps1"                         "tests\test.ps1"
+
+foreach ($prof in "minimal","standard","strict") {
+    Assert-Dir  "$RepoDir\hooks\profiles\$prof"                   "profiles\$prof\"
+    Assert-File "$RepoDir\hooks\profiles\$prof\pre-commit.sh"    "profiles\$prof\pre-commit.sh"
+    Assert-File "$RepoDir\hooks\profiles\$prof\pre-push.sh"      "profiles\$prof\pre-push.sh"
+    Assert-File "$RepoDir\hooks\profiles\$prof\pre-commit.ps1"   "profiles\$prof\pre-commit.ps1"
+    Assert-File "$RepoDir\hooks\profiles\$prof\pre-push.ps1"     "profiles\$prof\pre-push.ps1"
+}
 
 Assert-Dir  "$RepoDir\templates\rules"                              "templates\\rules\\"
 Assert-File "$RepoDir\templates\rules\react-native-reanimated.md"  "rules\\reanimated.md"
@@ -319,6 +329,35 @@ Remove-Item Env:HARNESS_ANDROID_OK -ErrorAction SilentlyContinue
 $env:PATH = $oldPath
 
 # ══════════════════════════════════════════════════════════════════════════════
+Section "9b. Profiles -- install salva .profile e hooks corretos"
+
+# Default install -> .profile = "strict"
+Invoke-Install *>$null
+$profileVal = if (Test-Path "$TestHarness\.profile") { Get-Content "$TestHarness\.profile" -Raw | ForEach-Object { $_.Trim() } } else { "" }
+if ($profileVal -eq "strict") {
+    Pass ".profile = strict apos install padrao"
+} else {
+    Fail ".profile esperado strict, obtido '$profileVal'"
+}
+
+# minimal pre-commit nao tem fta
+Assert-Lacks "$TestHarness\hooks\profiles\minimal\pre-commit.sh"  "fta"       "minimal/pre-commit.sh sem fta"
+Assert-Has   "$TestHarness\hooks\profiles\minimal\pre-commit.sh"  "typecheck" "minimal/pre-commit.sh tem typecheck"
+Assert-Has   "$TestHarness\hooks\profiles\strict\pre-commit.sh"   "fta"       "strict/pre-commit.sh tem fta"
+Assert-Has   "$TestHarness\hooks\profiles\standard\pre-commit.sh" "lint"      "standard/pre-commit.sh tem lint"
+Assert-Lacks "$TestHarness\hooks\profiles\standard\pre-commit.sh" "fta"       "standard/pre-commit.sh sem fta"
+
+# --profile minimal -> .profile = "minimal"
+Invoke-Install -ProfileArg "minimal" *>$null
+$profileVal = if (Test-Path "$TestHarness\.profile") { Get-Content "$TestHarness\.profile" -Raw | ForEach-Object { $_.Trim() } } else { "" }
+if ($profileVal -eq "minimal") { Pass ".profile = minimal apos -Profile minimal" } else { Fail ".profile esperado minimal, obtido '$profileVal'" }
+
+# --profile standard -> .profile = "standard"
+Invoke-Install -ProfileArg "standard" *>$null
+$profileVal = if (Test-Path "$TestHarness\.profile") { Get-Content "$TestHarness\.profile" -Raw | ForEach-Object { $_.Trim() } } else { "" }
+if ($profileVal -eq "standard") { Pass ".profile = standard apos -Profile standard" } else { Fail ".profile esperado standard, obtido '$profileVal'" }
+
+# ══════════════════════════════════════════════════════════════════════════════
 Section "10. SKILL.md -- referencias de path"
 
 Assert-Has $SkillPath "~/.claude/templates/rn-20days" `
@@ -346,6 +385,12 @@ Assert-Has $SkillPath 'BACKEND' `
     "SKILL.md tem deteccao de backend"
 Assert-Has $SkillPath 'seletivamente' `
     "SKILL.md copia rules seletivamente"
+Assert-Has $SkillPath 'HOOK_PROFILE' `
+    "SKILL.md referencia HOOK_PROFILE"
+Assert-Has $SkillPath '.rn-harness/.profile' `
+    "SKILL.md le .profile do harness"
+Assert-Has $SkillPath 'profiles/' `
+    "SKILL.md usa hooks/profiles/"
 
 } finally {
     Remove-Item -Recurse -Force $TmpBase -ErrorAction SilentlyContinue

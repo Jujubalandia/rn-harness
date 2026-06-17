@@ -104,6 +104,16 @@ assert_file "$REPO_DIR/hooks/pre-commit.ps1"                  "hooks/pre-commit.
 assert_file "$REPO_DIR/hooks/pre-push.ps1"                    "hooks/pre-push.ps1"
 assert_file "$REPO_DIR/tests/test.ps1"                        "tests/test.ps1"
 
+assert_dir  "$REPO_DIR/hooks/profiles/minimal"                "hooks/profiles/minimal/"
+assert_dir  "$REPO_DIR/hooks/profiles/standard"               "hooks/profiles/standard/"
+assert_dir  "$REPO_DIR/hooks/profiles/strict"                 "hooks/profiles/strict/"
+for profile in minimal standard strict; do
+  assert_file "$REPO_DIR/hooks/profiles/$profile/pre-commit.sh"  "profiles/$profile/pre-commit.sh"
+  assert_file "$REPO_DIR/hooks/profiles/$profile/pre-push.sh"    "profiles/$profile/pre-push.sh"
+  assert_file "$REPO_DIR/hooks/profiles/$profile/pre-commit.ps1" "profiles/$profile/pre-commit.ps1"
+  assert_file "$REPO_DIR/hooks/profiles/$profile/pre-push.ps1"   "profiles/$profile/pre-push.ps1"
+done
+
 assert_dir  "$REPO_DIR/templates/rules"                           "templates/rules/"
 assert_file "$REPO_DIR/templates/rules/react-native-reanimated.md" "rules/reanimated.md"
 assert_file "$REPO_DIR/templates/rules/expo-router.md"             "rules/expo-router.md"
@@ -271,6 +281,37 @@ actual=0
   || fail "pre-push sai $actual com resposta y (esperado 0)"
 
 # ══════════════════════════════════════════════════════════════════════════
+section "9b. Profiles — install salva .profile e hooks corretos"
+
+# Default install -> .profile = "strict"
+run_install >/dev/null 2>&1
+profile_val="$(cat "$TEST_HARNESS/.profile" 2>/dev/null || echo "")"
+[ "$profile_val" = "strict" ]   && pass ".profile = strict apos install padrao"   || fail ".profile esperado strict, obtido '$profile_val'"
+
+# Minimal pre-commit nao deve ter 'fta'
+assert_lacks "$TEST_HARNESS/hooks/profiles/minimal/pre-commit.sh"   "fta" "minimal/pre-commit.sh sem fta"
+
+# Minimal pre-commit deve ter apenas typecheck
+assert_has "$TEST_HARNESS/hooks/profiles/minimal/pre-commit.sh"   "typecheck" "minimal/pre-commit.sh tem typecheck"
+
+# Strict pre-commit deve ter fta
+assert_has "$TEST_HARNESS/hooks/profiles/strict/pre-commit.sh"   "fta" "strict/pre-commit.sh tem fta"
+
+# Standard pre-commit: tem lint, nao tem fta
+assert_has   "$TEST_HARNESS/hooks/profiles/standard/pre-commit.sh"   "lint" "standard/pre-commit.sh tem lint"
+assert_lacks "$TEST_HARNESS/hooks/profiles/standard/pre-commit.sh"   "fta" "standard/pre-commit.sh sem fta"
+
+# --profile minimal -> .profile = "minimal"
+run_install --profile minimal >/dev/null 2>&1
+profile_val="$(cat "$TEST_HARNESS/.profile" 2>/dev/null || echo "")"
+[ "$profile_val" = "minimal" ]   && pass ".profile = minimal apos --profile minimal"   || fail ".profile esperado minimal, obtido '$profile_val'"
+
+# --profile standard -> .profile = "standard"
+run_install --profile standard >/dev/null 2>&1
+profile_val="$(cat "$TEST_HARNESS/.profile" 2>/dev/null || echo "")"
+[ "$profile_val" = "standard" ]   && pass ".profile = standard apos --profile standard"   || fail ".profile esperado standard, obtido '$profile_val'"
+
+# ══════════════════════════════════════════════════════════════════════════
 section "10. SKILL.md — referências de path"
 
 assert_has "$SKILL" "~/.claude/templates/rn-20days" \
@@ -299,6 +340,10 @@ assert_has "$SKILL" 'BACKEND' \
   "SKILL.md tem deteccao de backend"
 assert_has "$SKILL" 'seletivamente' \
   "SKILL.md copia rules seletivamente"
+
+assert_has "$SKILL" 'HOOK_PROFILE'   "SKILL.md referencia HOOK_PROFILE"
+assert_has "$SKILL" '.rn-harness/.profile'   "SKILL.md le .profile do harness"
+assert_has "$SKILL" 'profiles/'   "SKILL.md usa hooks/profiles/"
 
 # ── sumário ───────────────────────────────────────────────────────────────
 echo ""

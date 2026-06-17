@@ -8,7 +8,10 @@
 #   Atualizar sem sobrescrever:  & "$env:USERPROFILE\.rn-harness\install.ps1"
 #   Forcar update dos templates:  & "$env:USERPROFILE\.rn-harness\install.ps1" -Force
 [CmdletBinding()]
-param([switch]$Force)
+param(
+    [switch]$Force,
+    [ValidateSet("minimal","standard","strict")][string]$Profile = "strict"
+)
 $ErrorActionPreference = 'Stop'
 
 $HarnessDir    = if ($env:RN_HARNESS_DIR)    { $env:RN_HARNESS_DIR }    else { "$env:USERPROFILE\.rn-harness" }
@@ -58,6 +61,10 @@ if (Test-Path (Join-Path $HarnessDir ".git") -PathType Container) {
     }
 }
 
+# --- 1b. Salvar perfil selecionado ---
+
+$Profile | Set-Content (Join-Path $HarnessDir ".profile") -Encoding UTF8
+
 # --- 2. Templates -> $TemplatesDest ---
 
 New-Item -ItemType Directory -Force -Path (Join-Path $TemplatesDest "docs") | Out-Null
@@ -99,6 +106,7 @@ Write-Host "OK rn-harness instalado"
 Write-Host "   Repo:      $HarnessDir"
 Write-Host "   Templates: $TemplatesDest"
 Write-Host "   Skill:     $skillDest"
+Write-Host "   Perfil:    $Profile (hooks)"
 Write-Host ""
 Write-Host "========================================"
 Write-Host "PROXIMOS PASSOS"
@@ -117,6 +125,9 @@ Write-Host "   - marketing-copywriter, viral-content-strategist"
 Write-Host "   - supabase-migrator"
 Write-Host ""
 Write-Host "3. Atualizar depois:"
-Write-Host "   & `"$HarnessDir\install.ps1`"          <- sem sobrescrever"
-Write-Host "   & `"$HarnessDir\install.ps1`" -Force   <- forca update dos templates"
+Write-Host "   & `"$HarnessDir\install.ps1`"                        <- sem sobrescrever"
+Write-Host "   & `"$HarnessDir\install.ps1`" -Force                 <- forca update dos templates"
+Write-Host "   & `"$HarnessDir\install.ps1`" -Profile minimal      <- muda perfil de hooks"
+Write-Host "   & `"$HarnessDir\install.ps1`" -Profile standard     <- muda perfil de hooks"
+Write-Host "   & `"$HarnessDir\install.ps1`" -Profile strict       <- muda perfil de hooks (padrao)"
 Write-Host ""

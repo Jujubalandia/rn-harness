@@ -14,7 +14,21 @@ CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 HARNESS_REMOTE="${HARNESS_REMOTE:-git@github.com:Jujubalandia/rn-harness.git}"
 TEMPLATES_DEST="$CLAUDE_DIR/templates/rn-20days"
 SKILLS_DEST="$CLAUDE_DIR/skills"
-FORCE="${1:-}"
+FORCE=""
+PROFILE="strict"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --force)   FORCE="--force"; shift ;;
+    --profile) PROFILE="$2";   shift 2 ;;
+    *)         shift ;;
+  esac
+done
+
+case "$PROFILE" in
+  minimal|standard|strict) ;;
+  *) echo "ERRO: --profile deve ser minimal, standard ou strict"; exit 1 ;;
+esac
 
 echo "rn-harness installer"
 echo "===================="
@@ -39,6 +53,10 @@ else
     exit 1
   fi
 fi
+
+# --- 1b. Salvar perfil selecionado ---
+
+echo "$PROFILE" > "$HARNESS_DIR/.profile"
 
 # --- 2. Templates → ~/.claude/templates/rn-20days/ ---
 
@@ -73,6 +91,7 @@ echo "✅ rn-harness instalado"
 echo "   Repo:      $HARNESS_DIR"
 echo "   Templates: $TEMPLATES_DEST"
 echo "   Skill:     $SKILLS_DEST/new-rn-project"
+echo "   Perfil:    $PROFILE (hooks)"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "PRÓXIMOS PASSOS"
@@ -92,6 +111,9 @@ echo "   - marketing-copywriter, viral-content-strategist"
 echo "   - supabase-migrator"
 echo ""
 echo "3. Atualizar depois:"
-echo "   $HARNESS_DIR/install.sh           ← atualiza sem sobrescrever"
-echo "   $HARNESS_DIR/install.sh --force   ← força atualização dos templates"
+echo "   $HARNESS_DIR/install.sh                          ← atualiza sem sobrescrever"
+echo "   $HARNESS_DIR/install.sh --force                   ← força atualização dos templates"
+echo "   $HARNESS_DIR/install.sh --profile minimal         ← muda perfil de hooks"
+echo "   $HARNESS_DIR/install.sh --profile standard        ← muda perfil de hooks"
+echo "   $HARNESS_DIR/install.sh --profile strict          ← muda perfil de hooks (padrão)"
 echo ""

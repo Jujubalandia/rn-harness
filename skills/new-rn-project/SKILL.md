@@ -118,6 +118,10 @@ Perguntar **somente o que não pode ser detectado automaticamente**:
 - **FOCO_PRINCIPAL**: diferencial ou viral hook (ex: "share card com IA", "gamification diária")
 - **IDIOMAS**: PT-BR / EN-US / ES-419 (mínimo PT-BR)
 - **MONETIZACAO**: freemium / IAP / ads / subscription / none
+- **HOOK_PROFILE**: ler de `~/.rn-harness/.profile` (gravado pelo install). Se arquivo existir, mostrar valor e perguntar se quer manter ou trocar. Se não existir, default `strict`.
+  - `minimal` — typecheck apenas (D1-D5, iteração rápida)
+  - `standard` — typecheck + lint + format + quality:full no push
+  - `strict` — tudo + fta (score-cap 60) — padrão para code freeze
 
 Derivar automaticamente:
 - `BUNDLE_ID` = `com.{{COMPANY}}.{{APP_SLUG}}`
@@ -205,12 +209,21 @@ Se projeto novo (sem package.json): copiar **todos os 11** como base.
 
 ```bash
 mkdir -p .githooks .claude/rules
-cp ~/.rn-harness/hooks/pre-commit.sh .githooks/pre-commit
-cp ~/.rn-harness/hooks/pre-push.sh .githooks/pre-push
+
+# Ler perfil do harness (default strict)
+HOOK_PROFILE=$(cat ~/.rn-harness/.profile 2>/dev/null || echo "strict")
+
+# Copiar hooks do perfil selecionado
+cp ~/.rn-harness/hooks/profiles/$HOOK_PROFILE/pre-commit.sh .githooks/pre-commit
+cp ~/.rn-harness/hooks/profiles/$HOOK_PROFILE/pre-push.sh   .githooks/pre-push
 chmod +x .githooks/pre-commit .githooks/pre-push
 git config core.hooksPath .githooks
 # Rules ja copiadas no Passo 4G
 ```
+
+Se o usuario escolheu trocar o perfil no Passo 2, usar o perfil escolhido em vez do lido do arquivo.
+
+Mostrar apos configurar: `Hooks instalados com perfil: [minimal/standard/strict]`
 
 Se `.git/` nao existir, rodar `git init` primeiro.
 
