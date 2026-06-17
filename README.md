@@ -14,7 +14,7 @@ Um conjunto de templates, skills e hooks que padronizam o fluxo completo:
 Spec → UX → Dev → QA → Store → Marketing
 ```
 
-O coração é a skill `/new-rn-project`: você abre um diretório vazio, digita o comando, e o Claude configura todo o projeto interativamente — CLAUDE.md preenchido, docs/, git hooks e checklist de dependências.
+O coração é a skill `/new-rn-project`: você abre um diretório (novo ou existente), digita o comando, e o Claude detecta automaticamente a stack via `package.json`, configura o projeto e cria toda a estrutura — CLAUDE.md preenchido, docs/, git hooks do perfil selecionado e knowledge rules seletivas.
 
 ---
 
@@ -44,36 +44,173 @@ git clone git@github.com:Jujubalandia/rn-harness.git ~/.rn-harness
 
 O installer coloca:
 - Templates em `~/.claude/templates/rn-20days/`
-- Skill `new-rn-project` em `~/.claude/skills/`
+- Skills `new-rn-project` e `rn-doctor` em `~/.claude/skills/`
+- Scripts (doctor, etc.) em `~/.rn-harness/scripts/`
 
 ---
 
+## Uso — Novo Projeto
+
+```bash
+mkdir ~/projects/meu-app && cd ~/projects/meu-app
+claude    # abre Claude Code
+```
+
+No Claude Code:
+
+```
+/new-rn-project
+```
+
+### O que o wizard faz
+
+**1. Auto-detecta a stack via `package.json`** (se existir) em 10 dimensões:
+
+| Dimensão | O que detecta |
+|----------|--------------|
+| State management | Zustand · Redux Toolkit · Jotai |
+| Navigation | Expo Router · React Navigation |
+| Styling | NativeWind · Tamagui · StyleSheet.create |
+| Backend | Supabase · Firebase · Convex |
+| i18n | i18next + expo-localization |
+| Animation | Reanimated v3 |
+| Gesture | Gesture Handler v2 |
+| Storage | expo-secure-store (OK) · AsyncStorage (AVISO) |
+| Image gen | Skia · react-native-view-shot |
+| Testing | RNTL · Detox |
+
+Mostra tabela de detecção e pede confirmação antes de prosseguir.
+
+**2. Pergunta só o que não pode detectar:** nome, descrição, idiomas, monetização, perfil de hooks.
+
+**3. Cria a estrutura:**
+- `CLAUDE.md` preenchido (sem placeholders)
+- `DECISIONS.md` + `TODO.md` inicializados
+- `docs/` com os 6 templates de fase
+- `.githooks/pre-commit` e `pre-push` do perfil selecionado
+- `.claude/rules/` com knowledge rules **seletivas** (só as relevantes para a stack detectada)
+
+**4. Gera checklist de próximos passos** adaptado à stack — só sugere instalar dependências que ainda não estão no `package.json`.
+
 ---
+
+## Doctor — Health Check
+
+22 verificações de saúde do projeto. Roda em qualquer projeto existente.
+
+```bash
+bash ~/.rn-harness/scripts/doctor.sh           # output legível
+bash ~/.rn-harness/scripts/doctor.sh --json    # output JSON (CI/scripts)
+```
+
+PowerShell:
+```powershell
+& "$env:USERPROFILE\.rn-harness\scripts\doctor.ps1"
+& "$env:USERPROFILE\.rn-harness\scripts\doctor.ps1" -Json
+```
+
+Ou via skill Claude Code (explica FAILs e executa fixes):
+```
+/rn-doctor
+```
+
+### O que verifica
+
+| Categoria | Checks |
+|-----------|--------|
+| Ambiente | node >= 20, pnpm, git, eas-cli |
+| Estrutura | package.json, CLAUDE.md, .gitignore cobre .env*, .claude/rules/ |
+| Segurança | .env* não commitado, sem chaves hardcoded em .ts/.tsx |
+| Versões SDK | Expo 56, RN 0.76.x, Reanimated v3 (não v4) |
+| Config | tsconfig strict, babel plugin reanimated, ESLint no-color-literals, scripts pnpm |
+| Segurança deps | expo-secure-store presente, AsyncStorage ausente de deps diretas |
+| Git/Hooks | .git/ inicializado, core.hooksPath = .githooks |
+| Store | app.json bundleIdentifier + packageName, eas.json |
+
+### Saída
+
+```
+  [OK]   node v22.x >= 20
+  [WARN] CLAUDE.md ausente (rn-harness não inicializado)
+  [FAIL] tsconfig.json sem "strict": true
+         fix: Adicionar '"strict": true' em compilerOptions
+  ...
+  OK: 18  WARN: 2  FAIL: 2  / 22 total
+```
+
+Exit 0 = nenhum FAIL (OK e WARN passam). Exit 1 = pelo menos um FAIL.
+
+### Quando rodar
+
+- D1: logo após `/new-rn-project`
+- Depois de clonar em nova máquina
+- Quando pre-commit hook falha sem motivo claro
+- Antes de `eas build --profile production`
+
+---
+
+## Hook Profiles
+
+Três níveis de quality gates, selecionáveis na instalação:
+
+| Profile | pre-commit | pre-push |
+|---------|-----------|---------|
+| `minimal` | typecheck | confirmação Android |
+| `standard` | typecheck + lint + format | quality:full + confirmação Android |
+| `strict` *(padrão)* | typecheck + lint + format + fta | quality:full + confirmação Android |
+
+**Instalar com profile específico:**
+
+```bash
+~/.rn-harness/install.sh --profile minimal    # D1-D5: iteração rápida
+~/.rn-harness/install.sh --profile standard   # sem fta
+~/.rn-harness/install.sh --profile strict     # tudo (padrão, recomendado)
+```
+
+```powershell
+& "$env:USERPROFILE\.rn-harness\install.ps1" -Profile minimal
+& "$env:USERPROFILE\.rn-harness\install.ps1" -Profile standard
+& "$env:USERPROFILE\.rn-harness\install.ps1" -Profile strict
+```
+
+O profile fica salvo em `~/.rn-harness/.profile`. O wizard `/new-rn-project` lê esse arquivo e copia os hooks correspondentes de `hooks/profiles/<profile>/` para o novo projeto.
+
+**Mudar de profile em projeto existente:**
+
+```bash
+~/.rn-harness/install.sh --profile strict     # atualiza .profile
+# depois, no projeto:
+cp ~/.rn-harness/hooks/profiles/strict/pre-commit.sh .githooks/pre-commit
+cp ~/.rn-harness/hooks/profiles/strict/pre-push.sh   .githooks/pre-push
+```
 
 ---
 
 ## Knowledge Rules
 
-11 arquivos `.md` instalados em `.claude/rules/` de cada novo projeto (copiados pelo `/new-rn-project`). O Claude carrega automaticamente o rule relevante com base nos arquivos que está editando (`globs`).
+11 arquivos `.md` que o Claude carrega automaticamente com base nos arquivos em edição (`globs`). Instalados em `.claude/rules/` de cada novo projeto pelo `/new-rn-project`.
 
-| Rule | Cobre |
-|------|-------|
-| `react-native-reanimated.md` | v3: shared values, worklets, runOnJS, layout animations |
-| `react-native-gesture-handler.md` | v2 Builder API: Gesture.Pan/Tap, useMemo obrigatório |
-| `expo-router.md` | file-based routing, typed routes, deep links |
-| `supabase.md` | auth + SecureStore, RLS, Edge Functions, realtime |
-| `i18next.md` | t(), Trans, CLDR plurals, Intl.* dates/numbers |
-| `zustand.md` | stores por domínio, selector pattern, persist + SecureStore |
-| `patterns.md` | folder structure, custom hooks, barrel exports, error boundaries |
-| `performance.md` | FlatList, memoization, bundle size, expo-image |
-| `security.md` | expo-secure-store, env vars, deep link validation, sem hardcode |
-| `accessibility.md` | 44pt targets, t() em accessibilityLabel, screen reader |
-| `styling.md` | StyleSheet.create, design tokens, dark mode |
+**As rules são seletivas:** o wizard copia apenas as relevantes para a stack detectada. Projeto sem Supabase não recebe `supabase.md`. Projeto sem Reanimated não recebe `react-native-reanimated.md`.
+
+| Rule | Copiada quando | Cobre |
+|------|---------------|-------|
+| `patterns.md` | sempre | folder structure, custom hooks, barrel exports, error boundaries |
+| `performance.md` | sempre | FlatList, memoization, bundle size, expo-image |
+| `security.md` | sempre | expo-secure-store, env vars, deep link validation |
+| `accessibility.md` | sempre | 44pt targets, t() em accessibilityLabel, screen reader |
+| `expo-router.md` | Navigation = Expo Router | file-based routing, typed routes, deep links |
+| `supabase.md` | Backend = Supabase | auth + SecureStore, RLS, Edge Functions, realtime |
+| `i18next.md` | i18n = i18next | t(), Trans, CLDR plurals, Intl.* dates/numbers |
+| `zustand.md` | State = Zustand | stores por domínio, selector pattern, persist + SecureStore |
+| `react-native-reanimated.md` | Animation = Reanimated v3 | v3: shared values, worklets, runOnJS, layout animations |
+| `react-native-gesture-handler.md` | Gesture = GH v2 | v2 Builder API: Gesture.Pan/Tap, useMemo obrigatório |
+| `styling.md` | Styling = StyleSheet.create | StyleSheet.create, design tokens, dark mode |
 
 **Versões alvo:** Expo SDK 56 · RN 0.76 · Reanimated v3 · GH v2 · React 18
 
 > Diferença do ERNE: rules aqui são **específicos para a stack do harness** (Supabase, i18next, Expo SDK 56), não genéricos para qualquer projeto RN.
 
+---
 
 ## Windows (PowerShell)
 
@@ -121,110 +258,6 @@ powershell -File "$env:USERPROFILE\.rn-harness\tests\test.ps1"
 | `HARNESS_CONFIRM` | `$env:HARNESS_CONFIRM` (uninstall sem prompt) |
 | `HARNESS_ANDROID_OK` | `$env:HARNESS_ANDROID_OK` (pre-push sem prompt) |
 
-
-## Uso — Novo Projeto
-
-```bash
-mkdir ~/projects/meu-app && cd ~/projects/meu-app
-claude    # abre Claude Code
-```
-
-No Claude Code:
-
-```
-/new-rn-project
-```
-
-O wizard pergunta nome, descrição, idiomas e monetização, depois cria:
-- `CLAUDE.md` preenchido (sem placeholders)
-- `DECISIONS.md` + `TODO.md` inicializados
-- `docs/` com os 6 templates de fase
-- `.githooks/pre-commit` e `pre-push` ativados
-
----
-
-## Doctor — Health Check
-
-22 verificações de saúde do projeto. Roda em qualquer projeto existente.
-
-```bash
-bash ~/.rn-harness/scripts/doctor.sh           # output legível
-bash ~/.rn-harness/scripts/doctor.sh --json    # output JSON (CI/scripts)
-```
-
-PowerShell:
-```powershell
-& "$env:USERPROFILE\.rn-harness\scripts\doctor.ps1"
-& "$env:USERPROFILE\.rn-harness\scripts\doctor.ps1" -Json
-```
-
-Ou via skill Claude Code:
-```
-/rn-doctor
-```
-
-### O que verifica
-
-| Categoria | Checks |
-|-----------|--------|
-| Ambiente | node >= 20, pnpm, git, eas-cli |
-| Estrutura | package.json, CLAUDE.md, .gitignore cobre .env*, .claude/rules/ |
-| Segurança | .env* não commitado, sem chaves hardcoded em .ts/.tsx |
-| Versões SDK | Expo 56, RN 0.76.x, Reanimated v3 (não v4) |
-| Config | tsconfig strict, babel plugin, ESLint no-color-literals, scripts pnpm |
-| Segurança deps | expo-secure-store presente, AsyncStorage ausente |
-| Git/Hooks | .git/ inicializado, core.hooksPath = .githooks |
-| Store | app.json bundleIdentifier + packageName, eas.json |
-
-### Saída
-
-```
-  [OK]   node v22.x >= 20
-  [WARN] CLAUDE.md ausente (rn-harness não inicializado)
-  [FAIL] tsconfig.json sem "strict": true
-         fix: Adicionar '"strict": true' em compilerOptions
-  ...
-  OK: 18  WARN: 2  FAIL: 2  / 22 total
-```
-
-Exit 0 = nenhum FAIL (OK e WARN passam). Exit 1 = pelo menos um FAIL.
-
-O Claude explica causa raiz e executa fix para cada `[FAIL]` quando invocado via `/rn-doctor`.
-
----
-
-## Hook Profiles
-
-Três níveis de quality gates, selecionáveis na instalação:
-
-| Profile | pre-commit | pre-push |
-|---------|-----------|---------|
-| `minimal` | typecheck | confirmação Android |
-| `standard` | typecheck + lint + format | quality:full + confirmação Android |
-| `strict` *(padrão)* | typecheck + lint + format + fta | quality:full + confirmação Android |
-
-**Instalar com profile específico:**
-
-```bash
-~/.rn-harness/install.sh --profile minimal    # só typecheck no pre-commit
-~/.rn-harness/install.sh --profile standard   # sem fta
-~/.rn-harness/install.sh --profile strict     # tudo (padrão)
-```
-
-```powershell
-& "$env:USERPROFILE\.rn-harness\install.ps1" -Profile minimal
-& "$env:USERPROFILE\.rn-harness\install.ps1" -Profile standard
-& "$env:USERPROFILE\.rn-harness\install.ps1" -Profile strict
-```
-
-O profile selecionado fica salvo em `~/.rn-harness/.profile`. O wizard `/new-rn-project` lê esse arquivo e copia os hooks correspondentes de `hooks/profiles/<profile>/` para o novo projeto.
-
-**Mudar de profile depois:**
-
-```bash
-~/.rn-harness/install.sh --profile minimal   # atualiza .profile e templates
-```
-
 ---
 
 ## Atualizar
@@ -243,31 +276,37 @@ O profile selecionado fica salvo em `~/.rn-harness/.profile`. O wizard `/new-rn-
 
 ```
 rn-harness/
-├── install.sh               ← instalador principal
-├── uninstall.sh             ← limpeza completa
+├── install.sh               ← instalador principal (bash)
+├── install.ps1              ← instalador PowerShell
+├── uninstall.sh / .ps1      ← limpeza completa
+├── scripts/
+│   ├── doctor.sh            ← 22 health checks (bash)
+│   └── doctor.ps1           ← 22 health checks (PowerShell)
 ├── templates/
 │   ├── CLAUDE.md.tmpl       ← template do projeto (com {{PLACEHOLDERS}})
 │   ├── DECISIONS.md.stub    ← ADR log inicial
 │   ├── TODO.md.stub         ← backlog inicial
-│   └── docs/
-│       ├── 01-spec.md       ← spec + pesquisa de mercado (D1-D2)
-│       ├── 02-dev-plan.md   ← plano 20 dias + milestones
-│       ├── 03-quality-gates.md  ← pirâmide de qualidade
-│       ├── 04-testing.md    ← tiers de teste + device matrix
-│       ├── 05-store-launch.md   ← checklist App Store + Play Store
-│       └── 06-marketing.md  ← calendário D-7→D+14
+│   ├── docs/
+│   │   ├── 01-spec.md       ← spec + pesquisa de mercado (D1-D2)
+│   │   ├── 02-dev-plan.md   ← plano 20 dias + milestones
+│   │   ├── 03-quality-gates.md  ← pirâmide de qualidade
+│   │   ├── 04-testing.md    ← tiers de teste + device matrix
+│   │   ├── 05-store-launch.md   ← checklist App Store + Play Store
+│   │   └── 06-marketing.md  ← calendário D-7→D+14
+│   └── rules/               ← 11 knowledge rules (copiadas seletivamente)
 ├── skills/
-│   └── new-rn-project/      ← skill Claude para wizard de init
-│       └── SKILL.md
-└── hooks/
-    ├── pre-commit.sh        ← typecheck + lint + format + fta (strict)
-    ├── pre-push.sh          ← quality:full + confirmação Android (strict)
-    ├── pre-commit.ps1       ← equivalente PowerShell
-    ├── pre-push.ps1         ← equivalente PowerShell
-    └── profiles/
-        ├── minimal/         ← pre-commit: typecheck only
-        ├── standard/        ← pre-commit: typecheck+lint+format
-        └── strict/          ← pre-commit: +fta (padrão)
+│   ├── new-rn-project/      ← wizard: init, stack detection, rules, hooks
+│   └── rn-doctor/           ← health check: 22 checks + fixes
+├── hooks/
+│   ├── pre-commit.sh / .ps1 ← strict (referência)
+│   ├── pre-push.sh / .ps1   ← strict (referência)
+│   └── profiles/
+│       ├── minimal/         ← pre-commit: typecheck only
+│       ├── standard/        ← pre-commit: typecheck+lint+format
+│       └── strict/          ← pre-commit: +fta (padrão)
+└── tests/
+    ├── test.sh              ← 147 checks (bash)
+    └── test.ps1             ← equivalente PowerShell
 ```
 
 ---
@@ -302,6 +341,7 @@ rn-harness/
 
 | Fase | Trigger | Skill | Como invocar |
 |------|---------|-------|--------------|
+| D1 | Após `/new-rn-project` ou clone em nova máquina | `rn-doctor` | `/rn-doctor` |
 | D1-D2 | Pesquisa de concorrentes | `firecrawl-search` | `/firecrawl-search` |
 | D1-D2 | Scrape de página concorrente | `firecrawl-scrape` | `/firecrawl-scrape` |
 | D3+ | Nova tela com cores hardcoded | `design-token-guardian` | subagente |
@@ -313,17 +353,19 @@ rn-harness/
 | Pre-commit | Qualquer diff | `code-review` | `/code-review` |
 | D13-D15 | Feature completa para QA | `qa-tester` | subagente |
 | D15 | Metadata App Store/Play | `store-metadata-reviewer` | subagente |
+| D15 | Antes de build produção | `rn-doctor` | `/rn-doctor` |
 | D17 | Copy de post por plataforma | `marketing-copywriter` | subagente |
 | D18 | Conceito viral | `viral-content-strategist` | subagente |
 | Pós-D20 | Auditoria de privacidade | `privacy-audit` | `/privacy-audit` |
 
 ### Skills bundled (instaladas pelo rn-harness)
 
-- `new-rn-project` — wizard de inicialização de projeto
+| Skill | O que faz |
+|-------|-----------|
+| `new-rn-project` | Wizard de init: detecta stack, cria estrutura, configura hooks e rules |
+| `rn-doctor` | 22 health checks + explica FAILs + executa fixes |
 
 ### Skills de marketplace (instalar separadamente)
-
-Abrir Claude Code e instalar via marketplace ou conforme documentação de cada provider:
 
 | Skill | Provider |
 |-------|----------|
@@ -343,18 +385,17 @@ Abrir Claude Code e instalar via marketplace ou conforme documentação de cada 
 
 ## Quality Gates
 
-O pré-commit bloqueia se qualquer gate falhar:
+O pré-commit bloqueia conforme o **perfil ativo** (ver Hook Profiles):
 
-```
-tsc --noEmit          → zero erros TypeScript
-eslint --max-warnings 0 → zero warnings (warnings = erros)
-prettier --check      → formatação 100% limpa
-fta --score-cap 60    → nenhum arquivo com complexidade ≥ 60
-```
+| Profile | Bloqueia se falhar |
+|---------|-------------------|
+| `minimal` | tsc --noEmit |
+| `standard` | tsc + eslint + prettier |
+| `strict` *(padrão)* | tsc + eslint + prettier + fta score ≥ 60 |
 
-Antes de push: `pnpm quality:full` (acima + testes).
+Antes de push (todos os perfis): `pnpm quality:full` (typecheck + lint + format + fta + tests).
 
-Antes de build produção: `pnpm preflight` + Golden Paths manuais.
+Antes de build produção: `pnpm preflight` + Golden Paths manuais + `/rn-doctor` sem FAILs.
 
 **FTA ≥ 60?** Refatorar: extrair sub-componentes, custom hooks, lookup tables. **Nunca** aumentar o score_cap.
 
@@ -378,30 +419,45 @@ Antes de build produção: `pnpm preflight` + Golden Paths manuais.
 ## FAQ
 
 **Como iniciar um projeto sem sobrescrever arquivos existentes?**
-A skill `/new-rn-project` checa a existência de cada arquivo antes de criar. Arquivos existentes são pulados com aviso.
+`/new-rn-project` checa cada arquivo antes de criar. Existentes são pulados com aviso.
 
 **Como forçar sobrescrita de um arquivo?**
-Deletar o arquivo manualmente e rodar `/new-rn-project` novamente, ou editar diretamente.
+Deletar manualmente e rodar `/new-rn-project` novamente, ou editar diretamente.
+
+**As knowledge rules são sempre todas copiadas?**
+Não — são seletivas. O wizard copia só as relevantes para a stack detectada. Projeto sem Supabase não recebe `supabase.md`. Se quiser todas: `/new-rn-project` em projeto sem `package.json` copia as 11.
+
+**Como mudar o hook profile depois de instalar?**
+```bash
+~/.rn-harness/install.sh --profile minimal     # atualiza ~/.rn-harness/.profile
+# Copiar hooks no projeto existente:
+cp ~/.rn-harness/hooks/profiles/minimal/pre-commit.sh .githooks/pre-commit
+cp ~/.rn-harness/hooks/profiles/minimal/pre-push.sh   .githooks/pre-push
+```
 
 **Posso usar sem Supabase?**
-Sim — remover as linhas de Supabase do `CLAUDE.md` após a geração e substituir pelo seu backend.
+Sim — na detecção de stack o wizard não vai copiar `supabase.md` nem sugerir `@supabase/supabase-js`. Basta confirmar o backend como "(nenhum)" ou Firebase.
 
 **Não tenho Mac para iOS.**
-Fluxo documentado em `04-testing.md`: Appetize.io para smoke + iPhone emprestado para TestFlight. O wizard do `/new-rn-project` inclui essa instrução no TODO.md.
+Fluxo documentado em `04-testing.md`: Appetize.io para smoke + iPhone emprestado para TestFlight. O wizard inclui essa instrução no TODO.md.
 
 **Como atualizar o harness sem quebrar projetos existentes?**
-`~/.rn-harness/install.sh` usa `cp -rn` (no-clobber). Projetos existentes com `CLAUDE.md` e `docs/` não são afetados.
+`install.sh` usa `cp -rn` (no-clobber). Projetos existentes não são afetados.
+
+**O `/rn-doctor` modifica arquivos?**
+Não — só lê e reporta. Fixes são sugeridos e executados apenas quando invocado via `/rn-doctor` no Claude Code, com confirmação do usuário.
 
 ---
 
 ## Contribuindo
 
-Este é um repo privado. Para melhorias:
-1. Editar os arquivos em `~/.rn-harness/` (clone local)
-2. Testar com `/new-rn-project` em projeto de teste
-3. Commitar e fazer push
+Repo privado. Para melhorias:
+1. Editar arquivos em `~/.rn-harness/` (clone local)
+2. Rodar suite de testes: `bash tests/test.sh` (deve terminar 0 failures)
+3. Testar skill manualmente: `/new-rn-project` ou `/rn-doctor` em projeto de teste
+4. Commitar e fazer push
 
-Mudanças nos templates entram em vigor nos **próximos** projetos criados via `/new-rn-project`. Projetos existentes não são afetados.
+Mudanças em templates e rules entram em vigor nos **próximos** projetos criados. Projetos existentes não são afetados.
 
 ---
 
@@ -411,4 +467,4 @@ Mudanças nos templates entram em vigor nos **próximos** projetos criados via `
 ~/.rn-harness/uninstall.sh
 ```
 
-Remove templates, skill e o repo clonado. Projetos existentes não são afetados.
+Remove templates, skills (`new-rn-project` + `rn-doctor`) e o repo clonado. Projetos existentes não são afetados.
