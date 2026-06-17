@@ -336,6 +336,17 @@ Assert-Has "$RepoDir\install.ps1" 'HARNESS_REMOTE' `
 Assert-Lacks "$RepoDir\install.ps1" 'ls-remote git@github' `
     "install.ps1 sem URL hardcoded no ls-remote"
 
+Assert-Has $SkillPath 'package.json' `
+    "SKILL.md menciona deteccao via package.json"
+Assert-Has $SkillPath 'STATE_MGMT' `
+    "SKILL.md tem deteccao de state management"
+Assert-Has $SkillPath 'NAVIGATION' `
+    "SKILL.md tem deteccao de navigation"
+Assert-Has $SkillPath 'BACKEND' `
+    "SKILL.md tem deteccao de backend"
+Assert-Has $SkillPath 'seletivamente' `
+    "SKILL.md copia rules seletivamente"
+
 } finally {
     Remove-Item -Recurse -Force $TmpBase -ErrorAction SilentlyContinue
 }

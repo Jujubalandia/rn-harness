@@ -289,6 +289,17 @@ assert_has "$REPO_DIR/install.sh" 'HARNESS_REMOTE' \
 assert_lacks "$REPO_DIR/install.sh" 'ls-remote git@github' \
   "install.sh sem URL hardcoded no ls-remote"
 
+assert_has "$SKILL" 'package.json' \
+  "SKILL.md menciona deteccao via package.json"
+assert_has "$SKILL" 'STATE_MGMT' \
+  "SKILL.md tem deteccao de state management"
+assert_has "$SKILL" 'NAVIGATION' \
+  "SKILL.md tem deteccao de navigation"
+assert_has "$SKILL" 'BACKEND' \
+  "SKILL.md tem deteccao de backend"
+assert_has "$SKILL" 'seletivamente' \
+  "SKILL.md copia rules seletivamente"
+
 # ── sumário ───────────────────────────────────────────────────────────────
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
