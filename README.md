@@ -50,6 +50,31 @@ O installer coloca:
 
 ---
 
+---
+
+## Knowledge Rules
+
+11 arquivos `.md` instalados em `.claude/rules/` de cada novo projeto (copiados pelo `/new-rn-project`). O Claude carrega automaticamente o rule relevante com base nos arquivos que está editando (`globs`).
+
+| Rule | Cobre |
+|------|-------|
+| `react-native-reanimated.md` | v3: shared values, worklets, runOnJS, layout animations |
+| `react-native-gesture-handler.md` | v2 Builder API: Gesture.Pan/Tap, useMemo obrigatório |
+| `expo-router.md` | file-based routing, typed routes, deep links |
+| `supabase.md` | auth + SecureStore, RLS, Edge Functions, realtime |
+| `i18next.md` | t(), Trans, CLDR plurals, Intl.* dates/numbers |
+| `zustand.md` | stores por domínio, selector pattern, persist + SecureStore |
+| `patterns.md` | folder structure, custom hooks, barrel exports, error boundaries |
+| `performance.md` | FlatList, memoization, bundle size, expo-image |
+| `security.md` | expo-secure-store, env vars, deep link validation, sem hardcode |
+| `accessibility.md` | 44pt targets, t() em accessibilityLabel, screen reader |
+| `styling.md` | StyleSheet.create, design tokens, dark mode |
+
+**Versões alvo:** Expo SDK 56 · RN 0.76 · Reanimated v3 · GH v2 · React 18
+
+> Diferença do ERNE: rules aqui são **específicos para a stack do harness** (Supabase, i18next, Expo SDK 56), não genéricos para qualquer projeto RN.
+
+
 ## Windows (PowerShell)
 
 Requer PowerShell 5.1+ (pré-instalado no Windows 10+) e Git for Windows.
