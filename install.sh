@@ -70,27 +70,34 @@ else
   cp -rn "$HARNESS_DIR/templates/." "$TEMPLATES_DEST/" 2>/dev/null || true
 fi
 
-# --- 3. Skill new-rn-project → ~/.claude/skills/ ---
+# --- 3. Scripts — garantir exec bit ---
 
-if [ -d "$SKILLS_DEST/new-rn-project" ] && [ "$FORCE" != "--force" ]; then
-  echo "→ Skill new-rn-project já existe (pular — use --force para atualizar)"
-else
-  echo "→ Instalando skill new-rn-project..."
-  mkdir -p "$SKILLS_DEST"
-  if [ "$FORCE" = "--force" ]; then
-    cp -rf "$HARNESS_DIR/skills/new-rn-project/" "$SKILLS_DEST/new-rn-project/"
+chmod +x "$HARNESS_DIR/scripts/"*.sh 2>/dev/null || true
+
+# --- 4. Skills → ~/.claude/skills/ ---
+
+mkdir -p "$SKILLS_DEST"
+for skill in new-rn-project rn-doctor; do
+  if [ -d "$SKILLS_DEST/$skill" ] && [ "$FORCE" != "--force" ]; then
+    echo "→ Skill $skill já existe (pular — use --force para atualizar)"
   else
-    cp -rn "$HARNESS_DIR/skills/new-rn-project/" "$SKILLS_DEST/new-rn-project/"
+    echo "→ Instalando skill $skill..."
+    if [ "$FORCE" = "--force" ]; then
+      cp -rf "$HARNESS_DIR/skills/$skill/" "$SKILLS_DEST/$skill/"
+    else
+      cp -rn "$HARNESS_DIR/skills/$skill/" "$SKILLS_DEST/$skill/" 2>/dev/null || true
+    fi
   fi
-fi
+done
 
-# --- 4. Resultado ---
+# --- 5. Resultado ---
 
 echo ""
 echo "✅ rn-harness instalado"
 echo "   Repo:      $HARNESS_DIR"
 echo "   Templates: $TEMPLATES_DEST"
-echo "   Skill:     $SKILLS_DEST/new-rn-project"
+echo "   Skills:    $SKILLS_DEST/new-rn-project, $SKILLS_DEST/rn-doctor"
+echo "   Doctor:    $HARNESS_DIR/scripts/doctor.sh"
 echo "   Perfil:    $PROFILE (hooks)"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

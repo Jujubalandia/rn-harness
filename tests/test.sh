@@ -114,6 +114,10 @@ for profile in minimal standard strict; do
   assert_file "$REPO_DIR/hooks/profiles/$profile/pre-push.ps1"   "profiles/$profile/pre-push.ps1"
 done
 
+assert_file "$REPO_DIR/scripts/doctor.sh"              "scripts/doctor.sh"
+assert_file "$REPO_DIR/scripts/doctor.ps1"             "scripts/doctor.ps1"
+assert_file "$REPO_DIR/skills/rn-doctor/SKILL.md"      "skills/rn-doctor/SKILL.md"
+
 assert_dir  "$REPO_DIR/templates/rules"                           "templates/rules/"
 assert_file "$REPO_DIR/templates/rules/react-native-reanimated.md" "rules/reanimated.md"
 assert_file "$REPO_DIR/templates/rules/expo-router.md"             "rules/expo-router.md"
@@ -344,6 +348,81 @@ assert_has "$SKILL" 'seletivamente' \
 assert_has "$SKILL" 'HOOK_PROFILE'   "SKILL.md referencia HOOK_PROFILE"
 assert_has "$SKILL" '.rn-harness/.profile'   "SKILL.md le .profile do harness"
 assert_has "$SKILL" 'profiles/'   "SKILL.md usa hooks/profiles/"
+
+# ══════════════════════════════════════════════════════════════════════════
+section "11. Doctor — estrutura e checks básicos"
+
+DOCTOR="$REPO_DIR/scripts/doctor.sh"
+DOCTOR_SKILL="$REPO_DIR/skills/rn-doctor/SKILL.md"
+
+# Existência dos artefatos
+assert_file "$DOCTOR"        "scripts/doctor.sh"
+assert_exec "$DOCTOR"        "scripts/doctor.sh executável"
+assert_file "$REPO_DIR/scripts/doctor.ps1" "scripts/doctor.ps1"
+assert_file "$DOCTOR_SKILL"  "skills/rn-doctor/SKILL.md"
+
+# install.sh menciona doctor e rn-doctor
+assert_has "$REPO_DIR/install.sh" 'rn-doctor'   "install.sh instala skill rn-doctor"
+assert_has "$REPO_DIR/install.sh" 'scripts/'   "install.sh referencia scripts/"
+
+# doctor.sh: conteúdo estrutural
+assert_has "$DOCTOR" 'node'   "doctor.sh checa node"
+assert_has "$DOCTOR" 'tsconfig'   "doctor.sh checa tsconfig"
+assert_has "$DOCTOR" 'babel'   "doctor.sh checa babel"
+assert_has "$DOCTOR" 'no-color-literals'   "doctor.sh checa ESLint no-color-literals"
+assert_has "$DOCTOR" 'expo-secure-store'   "doctor.sh checa expo-secure-store"
+assert_has "$DOCTOR" 'core.hooksPath'   "doctor.sh checa git hooks"
+assert_has "$DOCTOR" '\-\-json'   "doctor.sh suporta --json"
+assert_lacks "$DOCTOR" 'expo-doctor'   "doctor.sh nao depende de expo-doctor externo"
+
+# doctor.sh: exit 0 num projeto saudável mínimo
+HEALTHY_DIR="$(mktemp -d)"
+mkdir -p "$HEALTHY_DIR/.git" "$HEALTHY_DIR/.githooks" "$HEALTHY_DIR/.claude/rules"
+git -C "$HEALTHY_DIR" config core.hooksPath .githooks 2>/dev/null || true
+cat > "$HEALTHY_DIR/package.json" <<'PKGJSON'
+{
+  "name": "test-app",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "format:check": "prettier --check .",
+    "fta": "fta-cli --score-cap 60 src/",
+    "quality:full": "pnpm typecheck"
+  },
+  "dependencies": {
+    "expo": "^56.0.0",
+    "react-native": "0.76.0",
+    "react-native-reanimated": "^3.0.0",
+    "expo-secure-store": "^14.0.0"
+  }
+}
+PKGJSON
+echo ".env*" > "$HEALTHY_DIR/.gitignore"
+echo '{"compilerOptions":{"strict":true}}' > "$HEALTHY_DIR/tsconfig.json"
+echo 'module.exports={presets:["babel-preset-expo"],plugins:["react-native-reanimated/plugin"]}' > "$HEALTHY_DIR/babel.config.js"
+
+actual=0
+bash "$DOCTOR" "$HEALTHY_DIR" >/dev/null 2>&1 || actual=$?
+[ "$actual" -eq 0 ]   && pass "doctor.sh exit 0 em projeto saudavel"   || fail "doctor.sh exit $actual em projeto saudavel (esperado 0)"
+rm -rf "$HEALTHY_DIR"
+
+# doctor.sh: exit 1 quando há FAIL (sem tsconfig)
+SICK_DIR="$(mktemp -d)"
+mkdir -p "$SICK_DIR/.git"
+echo '{"name":"bad"}' > "$SICK_DIR/package.json"
+actual=0
+bash "$DOCTOR" "$SICK_DIR" >/dev/null 2>&1 || actual=$?
+[ "$actual" -eq 1 ]   && pass "doctor.sh exit 1 em projeto com FAILs"   || fail "doctor.sh exit $actual em projeto doente (esperado 1)"
+rm -rf "$SICK_DIR"
+
+# doctor.sh: --json produz JSON válido
+JSON_OUT=$(bash "$DOCTOR" --json "." 2>/dev/null || true)
+echo "$JSON_OUT" | python3 -c "import sys,json; d=json.load(sys.stdin); assert 'ok' in d and 'fail' in d and 'results' in d" 2>/dev/null   && pass "doctor.sh --json produz JSON valido"   || fail "doctor.sh --json nao produz JSON valido"
+
+# SKILL.md: conteúdo
+assert_has "$DOCTOR_SKILL" '22'   "rn-doctor SKILL.md menciona 22 checks"
+assert_has "$DOCTOR_SKILL" 'doctor.sh'   "rn-doctor SKILL.md referencia doctor.sh"
+assert_has "$DOCTOR_SKILL" 'doctor.ps1'   "rn-doctor SKILL.md referencia doctor.ps1"
 
 # ── sumário ───────────────────────────────────────────────────────────────
 echo ""

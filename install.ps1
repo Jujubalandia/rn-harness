@@ -79,23 +79,18 @@ if ($Force) {
     Copy-NoClob $templatesSrc $TemplatesDest
 }
 
-# --- 3. Skill new-rn-project -> $SkillsDest ---
+# --- 3. Skills -> $SkillsDest ---
 
-$skillSrc  = Join-Path $HarnessDir "skills\new-rn-project"
-$skillDest = Join-Path $SkillsDest "new-rn-project"
-
-if ((Test-Path $skillDest -PathType Container) -and -not $Force) {
-    Write-Host "-> Skill new-rn-project ja existe (pular -- use -Force para atualizar)"
-} else {
-    Write-Host "-> Instalando skill new-rn-project..."
-    New-Item -ItemType Directory -Force -Path $SkillsDest | Out-Null
-    if ($Force) {
-        if (Test-Path $skillDest) { Remove-Item -Recurse -Force $skillDest }
-        Copy-Item -Recurse $skillSrc $skillDest
+New-Item -ItemType Directory -Force -Path $SkillsDest | Out-Null
+foreach ($skill in @("new-rn-project","rn-doctor")) {
+    $skillSrc  = Join-Path $HarnessDir "skills\$skill"
+    $skillDest = Join-Path $SkillsDest $skill
+    if ((Test-Path $skillDest -PathType Container) -and -not $Force) {
+        Write-Host "-> Skill $skill ja existe (pular -- use -Force para atualizar)"
     } else {
-        if (-not (Test-Path $skillDest)) {
-            Copy-Item -Recurse $skillSrc $skillDest
-        }
+        Write-Host "-> Instalando skill $skill..."
+        if ($Force -and (Test-Path $skillDest)) { Remove-Item -Recurse -Force $skillDest }
+        if (-not (Test-Path $skillDest)) { Copy-Item -Recurse $skillSrc $skillDest }
     }
 }
 
@@ -105,7 +100,8 @@ Write-Host ""
 Write-Host "OK rn-harness instalado"
 Write-Host "   Repo:      $HarnessDir"
 Write-Host "   Templates: $TemplatesDest"
-Write-Host "   Skill:     $skillDest"
+Write-Host "   Skills:    $(Join-Path $SkillsDest 'new-rn-project'), rn-doctor"
+Write-Host "   Doctor:    $(Join-Path $HarnessDir 'scripts\doctor.ps1')"
 Write-Host "   Perfil:    $Profile (hooks)"
 Write-Host ""
 Write-Host "========================================"
