@@ -377,8 +377,10 @@ assert_lacks "$DOCTOR" 'expo-doctor'   "doctor.sh nao depende de expo-doctor ext
 
 # doctor.sh: exit 0 num projeto saudável mínimo
 HEALTHY_DIR="$(mktemp -d)"
-mkdir -p "$HEALTHY_DIR/.git" "$HEALTHY_DIR/.githooks" "$HEALTHY_DIR/.claude/rules"
-git -C "$HEALTHY_DIR" config core.hooksPath .githooks 2>/dev/null || true
+git init --quiet "$HEALTHY_DIR"
+mkdir -p "$HEALTHY_DIR/.githooks" "$HEALTHY_DIR/.claude/rules"
+git -C "$HEALTHY_DIR" config core.hooksPath .githooks
+touch "$HEALTHY_DIR/.claude/rules/patterns.md"
 cat > "$HEALTHY_DIR/package.json" <<'PKGJSON'
 {
   "name": "test-app",
@@ -399,7 +401,9 @@ cat > "$HEALTHY_DIR/package.json" <<'PKGJSON'
 PKGJSON
 echo ".env*" > "$HEALTHY_DIR/.gitignore"
 echo '{"compilerOptions":{"strict":true}}' > "$HEALTHY_DIR/tsconfig.json"
-echo 'module.exports={presets:["babel-preset-expo"],plugins:["react-native-reanimated/plugin"]}' > "$HEALTHY_DIR/babel.config.js"
+printf 'module.exports={presets:["babel-preset-expo"],plugins:["react-native-reanimated/plugin"]}' > "$HEALTHY_DIR/babel.config.js"
+printf '{"rules":{"react-native/no-color-literals":"error"}}' > "$HEALTHY_DIR/.eslintrc.json"
+touch "$HEALTHY_DIR/CLAUDE.md"
 
 actual=0
 bash "$DOCTOR" "$HEALTHY_DIR" >/dev/null 2>&1 || actual=$?

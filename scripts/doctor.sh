@@ -111,8 +111,8 @@ fi
 
 # ── 10. Expo SDK 56 ───────────────────────────────────────────────────────────
 if [ -f "$PKG" ]; then
-  EXPO_VER=$(grep -o '"expo"[[:space:]]*:[[:space:]]*"[^"]*"' "$PKG" | grep -o '"[0-9][^"]*"' | tr -d '"' | head -1)
-  EXPO_MAJ=$(echo "$EXPO_VER" | sed 's/[\^~]//' | cut -d. -f1)
+  EXPO_VER=$(grep -o '"expo"[[:space:]]*:[[:space:]]*"[^"]*"' "$PKG" | sed 's/.*"expo"[^"]*"//;s/".*//' | tr -d '"^~' | head -1)
+  EXPO_MAJ=$(echo "$EXPO_VER" | cut -d. -f1)
   if [ "$EXPO_MAJ" = "56" ] 2>/dev/null; then
     _out OK 10 "Expo SDK $EXPO_VER (56)"
   elif [ -n "$EXPO_MAJ" ]; then
@@ -193,7 +193,7 @@ if [ -n "$ESLINT" ]; then
     _out WARN 15 "ESLint sem react-native/no-color-literals" "Adicionar 'react-native/no-color-literals': 'error' ao ESLint config"
   fi
 else
-  _out FAIL 15 "ESLint config não encontrado" "pnpm add -D eslint @react-native/eslint-config"
+  _out WARN 15 "ESLint config não encontrado (adicionar em D3+)" "pnpm add -D eslint @react-native/eslint-config"
 fi
 
 # ── 16. Scripts pnpm obrigatórios ────────────────────────────────────────────
@@ -211,8 +211,8 @@ fi
 
 # ── 17. expo-secure-store presente, AsyncStorage ausente de deps diretas ──────
 if [ -f "$PKG" ]; then
-  HAS_SECURE=$(grep -c '"expo-secure-store"' "$PKG" 2>/dev/null || echo 0)
-  HAS_ASYNC=$(grep -c '"@react-native-async-storage/async-storage"' "$PKG" 2>/dev/null || echo 0)
+  HAS_SECURE=$(grep -c '"expo-secure-store"' "$PKG" 2>/dev/null; true)
+  HAS_ASYNC=$(grep -c '"@react-native-async-storage/async-storage"' "$PKG" 2>/dev/null; true)
   if [ "$HAS_SECURE" -gt 0 ] && [ "$HAS_ASYNC" -eq 0 ]; then
     _out OK 17 "expo-secure-store presente, AsyncStorage ausente"
   elif [ "$HAS_SECURE" -gt 0 ] && [ "$HAS_ASYNC" -gt 0 ]; then

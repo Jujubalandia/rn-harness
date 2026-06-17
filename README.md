@@ -143,6 +143,56 @@ O wizard pergunta nome, descrição, idiomas e monetização, depois cria:
 
 ---
 
+## Doctor — Health Check
+
+22 verificações de saúde do projeto. Roda em qualquer projeto existente.
+
+```bash
+bash ~/.rn-harness/scripts/doctor.sh           # output legível
+bash ~/.rn-harness/scripts/doctor.sh --json    # output JSON (CI/scripts)
+```
+
+PowerShell:
+```powershell
+& "$env:USERPROFILE\.rn-harness\scripts\doctor.ps1"
+& "$env:USERPROFILE\.rn-harness\scripts\doctor.ps1" -Json
+```
+
+Ou via skill Claude Code:
+```
+/rn-doctor
+```
+
+### O que verifica
+
+| Categoria | Checks |
+|-----------|--------|
+| Ambiente | node >= 20, pnpm, git, eas-cli |
+| Estrutura | package.json, CLAUDE.md, .gitignore cobre .env*, .claude/rules/ |
+| Segurança | .env* não commitado, sem chaves hardcoded em .ts/.tsx |
+| Versões SDK | Expo 56, RN 0.76.x, Reanimated v3 (não v4) |
+| Config | tsconfig strict, babel plugin, ESLint no-color-literals, scripts pnpm |
+| Segurança deps | expo-secure-store presente, AsyncStorage ausente |
+| Git/Hooks | .git/ inicializado, core.hooksPath = .githooks |
+| Store | app.json bundleIdentifier + packageName, eas.json |
+
+### Saída
+
+```
+  [OK]   node v22.x >= 20
+  [WARN] CLAUDE.md ausente (rn-harness não inicializado)
+  [FAIL] tsconfig.json sem "strict": true
+         fix: Adicionar '"strict": true' em compilerOptions
+  ...
+  OK: 18  WARN: 2  FAIL: 2  / 22 total
+```
+
+Exit 0 = nenhum FAIL (OK e WARN passam). Exit 1 = pelo menos um FAIL.
+
+O Claude explica causa raiz e executa fix para cada `[FAIL]` quando invocado via `/rn-doctor`.
+
+---
+
 ## Hook Profiles
 
 Três níveis de quality gates, selecionáveis na instalação:

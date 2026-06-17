@@ -148,6 +148,10 @@ foreach ($prof in "minimal","standard","strict") {
     Assert-File "$RepoDir\hooks\profiles\$prof\pre-push.ps1"     "profiles\$prof\pre-push.ps1"
 }
 
+Assert-File "$RepoDir\scripts\doctor.sh"          "scripts\doctor.sh"
+Assert-File "$RepoDir\scripts\doctor.ps1"         "scripts\doctor.ps1"
+Assert-File "$RepoDir\skills\rn-doctor\SKILL.md"  "skills\rn-doctor\SKILL.md"
+
 Assert-Dir  "$RepoDir\templates\rules"                              "templates\\rules\\"
 Assert-File "$RepoDir\templates\rules\react-native-reanimated.md"  "rules\\reanimated.md"
 Assert-File "$RepoDir\templates\rules\expo-router.md"              "rules\\expo-router.md"
@@ -391,6 +395,31 @@ Assert-Has $SkillPath '.rn-harness/.profile' `
     "SKILL.md le .profile do harness"
 Assert-Has $SkillPath 'profiles/' `
     "SKILL.md usa hooks/profiles/"
+
+# ══════════════════════════════════════════════════════════════════════════════
+Section "11. Doctor -- estrutura e checks basicos"
+
+$DoctorSh   = "$RepoDir\scripts\doctor.sh"
+$DoctorPs1  = "$RepoDir\scripts\doctor.ps1"
+$DoctorSkill = "$RepoDir\skills\rn-doctor\SKILL.md"
+
+Assert-File $DoctorSh   "scripts\doctor.sh"
+Assert-File $DoctorPs1  "scripts\doctor.ps1"
+Assert-File $DoctorSkill "skills\rn-doctor\SKILL.md"
+
+Assert-Has "$RepoDir\install.ps1" 'rn-doctor'  "install.ps1 instala skill rn-doctor"
+Assert-Has "$RepoDir\install.ps1" 'scripts'    "install.ps1 referencia scripts"
+Assert-Has $DoctorPs1 'node'                   "doctor.ps1 checa node"
+Assert-Has $DoctorPs1 'tsconfig'               "doctor.ps1 checa tsconfig"
+Assert-Has $DoctorPs1 'babel'                  "doctor.ps1 checa babel"
+Assert-Has $DoctorPs1 'no-color-literals'      "doctor.ps1 checa ESLint no-color-literals"
+Assert-Has $DoctorPs1 'expo-secure-store'      "doctor.ps1 checa expo-secure-store"
+Assert-Has $DoctorPs1 'core.hooksPath'         "doctor.ps1 checa git hooks"
+Assert-Has $DoctorPs1 '\-Json'                 "doctor.ps1 suporta -Json"
+Assert-Lacks $DoctorPs1 'expo-doctor'          "doctor.ps1 nao depende de expo-doctor externo"
+Assert-Has $DoctorSkill '22'                   "rn-doctor SKILL.md menciona 22 checks"
+Assert-Has $DoctorSkill 'doctor.sh'            "rn-doctor SKILL.md referencia doctor.sh"
+Assert-Has $DoctorSkill 'doctor.ps1'           "rn-doctor SKILL.md referencia doctor.ps1"
 
 } finally {
     Remove-Item -Recurse -Force $TmpBase -ErrorAction SilentlyContinue
