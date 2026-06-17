@@ -143,6 +143,40 @@ O wizard pergunta nome, descrição, idiomas e monetização, depois cria:
 
 ---
 
+## Hook Profiles
+
+Três níveis de quality gates, selecionáveis na instalação:
+
+| Profile | pre-commit | pre-push |
+|---------|-----------|---------|
+| `minimal` | typecheck | confirmação Android |
+| `standard` | typecheck + lint + format | quality:full + confirmação Android |
+| `strict` *(padrão)* | typecheck + lint + format + fta | quality:full + confirmação Android |
+
+**Instalar com profile específico:**
+
+```bash
+~/.rn-harness/install.sh --profile minimal    # só typecheck no pre-commit
+~/.rn-harness/install.sh --profile standard   # sem fta
+~/.rn-harness/install.sh --profile strict     # tudo (padrão)
+```
+
+```powershell
+& "$env:USERPROFILE\.rn-harness\install.ps1" -Profile minimal
+& "$env:USERPROFILE\.rn-harness\install.ps1" -Profile standard
+& "$env:USERPROFILE\.rn-harness\install.ps1" -Profile strict
+```
+
+O profile selecionado fica salvo em `~/.rn-harness/.profile`. O wizard `/new-rn-project` lê esse arquivo e copia os hooks correspondentes de `hooks/profiles/<profile>/` para o novo projeto.
+
+**Mudar de profile depois:**
+
+```bash
+~/.rn-harness/install.sh --profile minimal   # atualiza .profile e templates
+```
+
+---
+
 ## Atualizar
 
 ```bash
@@ -176,8 +210,14 @@ rn-harness/
 │   └── new-rn-project/      ← skill Claude para wizard de init
 │       └── SKILL.md
 └── hooks/
-    ├── pre-commit.sh        ← typecheck + lint + format + fta
-    └── pre-push.sh          ← quality:full + confirmação Android
+    ├── pre-commit.sh        ← typecheck + lint + format + fta (strict)
+    ├── pre-push.sh          ← quality:full + confirmação Android (strict)
+    ├── pre-commit.ps1       ← equivalente PowerShell
+    ├── pre-push.ps1         ← equivalente PowerShell
+    └── profiles/
+        ├── minimal/         ← pre-commit: typecheck only
+        ├── standard/        ← pre-commit: typecheck+lint+format
+        └── strict/          ← pre-commit: +fta (padrão)
 ```
 
 ---
