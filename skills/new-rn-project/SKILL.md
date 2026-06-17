@@ -78,14 +78,22 @@ Para cada arquivo abaixo, checar se existe antes de criar:
 **E. `.githooks/pre-commit`** — de `~/.rn-harness/hooks/pre-commit.sh`
 **F. `.githooks/pre-push`** — de `~/.rn-harness/hooks/pre-push.sh`
 
+**G. `.claude/rules/`** — copiar de `~/.claude/templates/rn-20days/rules/`
+  Criar diretório `.claude/rules/` e copiar todos os 11 arquivos `.md` de rules.
+  Esses arquivos ensinam o Claude as APIs corretas para cada biblioteca da stack:
+  `react-native-reanimated.md`, `react-native-gesture-handler.md`, `expo-router.md`,
+  `supabase.md`, `i18next.md`, `zustand.md`, `patterns.md`, `performance.md`,
+  `security.md`, `accessibility.md`, `styling.md`
+
 ### Passo 5: Configurar git hooks
 
 ```bash
-mkdir -p .githooks
+mkdir -p .githooks .claude/rules
 cp ~/.rn-harness/hooks/pre-commit.sh .githooks/pre-commit
 cp ~/.rn-harness/hooks/pre-push.sh .githooks/pre-push
 chmod +x .githooks/pre-commit .githooks/pre-push
 git config core.hooksPath .githooks
+cp ~/.claude/templates/rn-20days/rules/*.md .claude/rules/
 ```
 
 Se `.git/` não existir ainda, rodar `git init` primeiro.

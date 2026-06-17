@@ -42,7 +42,7 @@ fi
 
 # --- 2. Templates → ~/.claude/templates/rn-20days/ ---
 
-mkdir -p "$TEMPLATES_DEST/docs"
+mkdir -p "$TEMPLATES_DEST/docs" "$TEMPLATES_DEST/rules"
 
 if [ "$FORCE" = "--force" ]; then
   echo "→ Copiando templates (--force: sobrescrevendo)..."

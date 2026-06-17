@@ -138,6 +138,19 @@ Assert-File "$RepoDir\hooks\pre-commit.ps1"                   "hooks\pre-commit.
 Assert-File "$RepoDir\hooks\pre-push.ps1"                     "hooks\pre-push.ps1"
 Assert-File "$RepoDir\tests\test.ps1"                         "tests\test.ps1"
 
+Assert-Dir  "$RepoDir\templates\rules"                              "templates\\rules\\"
+Assert-File "$RepoDir\templates\rules\react-native-reanimated.md"  "rules\\reanimated.md"
+Assert-File "$RepoDir\templates\rules\expo-router.md"              "rules\\expo-router.md"
+Assert-File "$RepoDir\templates\rules\supabase.md"                 "rules\\supabase.md"
+Assert-File "$RepoDir\templates\rules\i18next.md"                  "rules\\i18next.md"
+Assert-File "$RepoDir\templates\rules\zustand.md"                  "rules\\zustand.md"
+Assert-File "$RepoDir\templates\rules\patterns.md"                 "rules\\patterns.md"
+Assert-File "$RepoDir\templates\rules\performance.md"              "rules\\performance.md"
+Assert-File "$RepoDir\templates\rules\security.md"                 "rules\\security.md"
+Assert-File "$RepoDir\templates\rules\accessibility.md"            "rules\\accessibility.md"
+Assert-File "$RepoDir\templates\rules\styling.md"                  "rules\\styling.md"
+Assert-File "$RepoDir\templates\rules\react-native-gesture-handler.md" "rules\\gesture-handler.md"
+
 foreach ($prefix in "01","02","03","04","05","06") {
     $found = Get-ChildItem "$RepoDir\templates\docs\${prefix}-*.md" -ErrorAction SilentlyContinue
     if ($found) { Pass "templates\docs\${prefix}-*.md" } else { Fail "templates\docs\${prefix}-*.md ausente" }
@@ -156,6 +169,9 @@ Assert-File "$TestClaude\templates\rn-20days\TODO.md.stub"                      
 Assert-Dir  "$TestClaude\templates\rn-20days\docs"                              "docs\ instalado"
 Assert-Dir  "$TestClaude\skills\new-rn-project"                                 "skill instalada"
 Assert-File "$TestClaude\skills\new-rn-project\SKILL.md"                        "SKILL.md instalado"
+Assert-Dir  "$TestClaude\templates\rn-20days\rules"                                   "rules\\ instalado"
+Assert-File "$TestClaude\templates\rn-20days\rules\supabase.md"                      "rules\\supabase.md instalado"
+Assert-File "$TestClaude\templates\rn-20days\rules\i18next.md"                       "rules\\i18next.md instalado"
 
 foreach ($prefix in "01","02","03","04","05","06") {
     $found = Get-ChildItem "$TestClaude\templates\rn-20days\docs\${prefix}-*.md" -ErrorAction SilentlyContinue

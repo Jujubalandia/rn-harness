@@ -104,6 +104,19 @@ assert_file "$REPO_DIR/hooks/pre-commit.ps1"                  "hooks/pre-commit.
 assert_file "$REPO_DIR/hooks/pre-push.ps1"                    "hooks/pre-push.ps1"
 assert_file "$REPO_DIR/tests/test.ps1"                        "tests/test.ps1"
 
+assert_dir  "$REPO_DIR/templates/rules"                           "templates/rules/"
+assert_file "$REPO_DIR/templates/rules/react-native-reanimated.md" "rules/reanimated.md"
+assert_file "$REPO_DIR/templates/rules/expo-router.md"             "rules/expo-router.md"
+assert_file "$REPO_DIR/templates/rules/supabase.md"                "rules/supabase.md"
+assert_file "$REPO_DIR/templates/rules/i18next.md"                 "rules/i18next.md"
+assert_file "$REPO_DIR/templates/rules/zustand.md"                 "rules/zustand.md"
+assert_file "$REPO_DIR/templates/rules/patterns.md"                "rules/patterns.md"
+assert_file "$REPO_DIR/templates/rules/performance.md"             "rules/performance.md"
+assert_file "$REPO_DIR/templates/rules/security.md"                "rules/security.md"
+assert_file "$REPO_DIR/templates/rules/accessibility.md"           "rules/accessibility.md"
+assert_file "$REPO_DIR/templates/rules/styling.md"                 "rules/styling.md"
+assert_file "$REPO_DIR/templates/rules/react-native-gesture-handler.md" "rules/gesture-handler.md"
+
 for prefix in "01" "02" "03" "04" "05" "06"; do
   found=0
   for f in "$REPO_DIR/templates/docs/${prefix}-"*.md; do
@@ -127,6 +140,10 @@ assert_file "$TEST_CLAUDE/templates/rn-20days/TODO.md.stub"            "TODO.md.
 assert_dir  "$TEST_CLAUDE/templates/rn-20days/docs"                   "docs/ instalado"
 assert_dir  "$TEST_CLAUDE/skills/new-rn-project"                      "skill instalada"
 assert_file "$TEST_CLAUDE/skills/new-rn-project/SKILL.md"             "SKILL.md instalado"
+
+assert_dir  "$TEST_CLAUDE/templates/rn-20days/rules"                           "rules/ instalado"
+assert_file "$TEST_CLAUDE/templates/rn-20days/rules/supabase.md"               "rules/supabase.md instalado"
+assert_file "$TEST_CLAUDE/templates/rn-20days/rules/i18next.md"                "rules/i18next.md instalado"
 
 for prefix in "01" "02" "03" "04" "05" "06"; do
   found=0

@@ -61,6 +61,7 @@ if (Test-Path (Join-Path $HarnessDir ".git") -PathType Container) {
 # --- 2. Templates -> $TemplatesDest ---
 
 New-Item -ItemType Directory -Force -Path (Join-Path $TemplatesDest "docs") | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $TemplatesDest "rules") | Out-Null
 $templatesSrc = Join-Path $HarnessDir "templates"
 
 if ($Force) {
