@@ -64,7 +64,7 @@ No Claude Code:
 
 ### O que o wizard faz
 
-**1. Auto-detecta a stack via `package.json`** (se existir) em 10 dimensões:
+**1. Auto-detecta a stack via `package.json`** (se existir) em 13 dimensões:
 
 | Dimensão | O que detecta |
 |----------|--------------|
@@ -78,6 +78,9 @@ No Claude Code:
 | Storage | expo-secure-store (OK) · AsyncStorage (AVISO) |
 | Image gen | Skia · react-native-view-shot |
 | Testing | RNTL · Detox |
+| Video | expo-video (OK) · expo-av (AVISO: deprecated) |
+| Monetization | RevenueCat · react-native-iap |
+| Notifications | expo-notifications |
 
 Mostra tabela de detecção e pede confirmação antes de prosseguir.
 
@@ -90,13 +93,13 @@ Mostra tabela de detecção e pede confirmação antes de prosseguir.
 - `.githooks/pre-commit` e `pre-push` do perfil selecionado
 - `.claude/rules/` com knowledge rules **seletivas** (só as relevantes para a stack detectada)
 
-**4. Gera checklist de próximos passos** adaptado à stack — só sugere instalar dependências que ainda não estão no `package.json`.
+**4. Gera checklist de próximos passos** adaptado à stack — só sugere instalar dependências que ainda não estão no `package.json`, e executa `npx expo install --fix` para corrigir versões incompatíveis com o SDK 56.
 
 ---
 
 ## Doctor — Health Check
 
-22 verificações de saúde do projeto. Roda em qualquer projeto existente.
+24 verificações de saúde do projeto. Roda em qualquer projeto existente.
 
 ```bash
 bash ~/.rn-harness/scripts/doctor.sh           # output legível
@@ -126,6 +129,7 @@ Ou via skill Claude Code (explica FAILs e executa fixes):
 | Segurança deps | expo-secure-store presente, AsyncStorage ausente de deps diretas |
 | Git/Hooks | .git/ inicializado, core.hooksPath = .githooks |
 | Store | app.json bundleIdentifier + packageName, eas.json |
+| Padrões proibidos | `lineHeight` em StyleSheet (bug Android), `expo-av` importado (deprecated) |
 
 ### Saída
 
@@ -135,7 +139,7 @@ Ou via skill Claude Code (explica FAILs e executa fixes):
   [FAIL] tsconfig.json sem "strict": true
          fix: Adicionar '"strict": true' em compilerOptions
   ...
-  OK: 18  WARN: 2  FAIL: 2  / 22 total
+  OK: 20  WARN: 2  FAIL: 2  / 24 total
 ```
 
 Exit 0 = nenhum FAIL (OK e WARN passam). Exit 1 = pelo menos um FAIL.
@@ -188,9 +192,9 @@ cp ~/.rn-harness/hooks/profiles/strict/pre-push.sh   .githooks/pre-push
 
 ## Knowledge Rules
 
-11 arquivos `.md` que o Claude carrega automaticamente com base nos arquivos em edição (`globs`). Instalados em `.claude/rules/` de cada novo projeto pelo `/new-rn-project`.
+15 arquivos `.md` que o Claude carrega automaticamente com base nos arquivos em edição (`globs`). Instalados em `.claude/rules/` de cada novo projeto pelo `/new-rn-project`.
 
-**As rules são seletivas:** o wizard copia apenas as relevantes para a stack detectada. Projeto sem Supabase não recebe `supabase.md`. Projeto sem Reanimated não recebe `react-native-reanimated.md`.
+**As rules são seletivas:** o wizard copia apenas as relevantes para a stack detectada. Projeto sem Supabase não recebe `supabase.md`. Projeto sem expo-video não recebe `expo-video.md`.
 
 | Rule | Copiada quando | Cobre |
 |------|---------------|-------|
@@ -198,13 +202,17 @@ cp ~/.rn-harness/hooks/profiles/strict/pre-push.sh   .githooks/pre-push
 | `performance.md` | sempre | FlatList, memoization, bundle size, expo-image |
 | `security.md` | sempre | expo-secure-store, env vars, deep link validation |
 | `accessibility.md` | sempre | 44pt targets, t() em accessibilityLabel, screen reader |
-| `expo-router.md` | Navigation = Expo Router | file-based routing, typed routes, deep links |
+| `forbidden.md` | sempre | lineHeight (bug Android), expo-av deprecated, AsyncStorage para secrets |
+| `expo-router.md` | Navigation = Expo Router | file-based routing, NativeTabs, SF Symbols/MD icons, deep links |
 | `supabase.md` | Backend = Supabase | auth + SecureStore, RLS, Edge Functions, realtime |
 | `i18next.md` | i18n = i18next | t(), Trans, CLDR plurals, Intl.* dates/numbers |
 | `zustand.md` | State = Zustand | stores por domínio, selector pattern, persist + SecureStore |
 | `react-native-reanimated.md` | Animation = Reanimated v3 | v3: shared values, worklets, runOnJS, layout animations |
 | `react-native-gesture-handler.md` | Gesture = GH v2 | v2 Builder API: Gesture.Pan/Tap, useMemo obrigatório |
 | `styling.md` | Styling = StyleSheet.create | StyleSheet.create, design tokens, dark mode |
+| `expo-video.md` | Video = expo-video | VideoView, useVideoPlayer, cleanup, expo-audio |
+| `revenue-cat.md` | Monetization = RevenueCat | usePremium hook, paywall, restore, sandbox testing |
+| `expo-notifications.md` | Notifications = expo-notifications | push token, handler, listeners, local scheduling |
 
 **Versões alvo:** Expo SDK 56 · RN 0.76 · Reanimated v3 · GH v2 · React 18
 
@@ -280,8 +288,8 @@ rn-harness/
 ├── install.ps1              ← instalador PowerShell
 ├── uninstall.sh / .ps1      ← limpeza completa
 ├── scripts/
-│   ├── doctor.sh            ← 22 health checks (bash)
-│   └── doctor.ps1           ← 22 health checks (PowerShell)
+│   ├── doctor.sh            ← 24 health checks (bash)
+│   └── doctor.ps1           ← 24 health checks (PowerShell)
 ├── templates/
 │   ├── CLAUDE.md.tmpl       ← template do projeto (com {{PLACEHOLDERS}})
 │   ├── DECISIONS.md.stub    ← ADR log inicial
@@ -293,10 +301,10 @@ rn-harness/
 │   │   ├── 04-testing.md    ← tiers de teste + device matrix
 │   │   ├── 05-store-launch.md   ← checklist App Store + Play Store
 │   │   └── 06-marketing.md  ← calendário D-7→D+14
-│   └── rules/               ← 11 knowledge rules (copiadas seletivamente)
+│   └── rules/               ← 15 knowledge rules (copiadas seletivamente)
 ├── skills/
 │   ├── new-rn-project/      ← wizard: init, stack detection, rules, hooks
-│   └── rn-doctor/           ← health check: 22 checks + fixes
+│   └── rn-doctor/           ← health check: 24 checks + fixes
 ├── hooks/
 │   ├── pre-commit.sh / .ps1 ← strict (referência)
 │   ├── pre-push.sh / .ps1   ← strict (referência)
@@ -305,7 +313,7 @@ rn-harness/
 │       ├── standard/        ← pre-commit: typecheck+lint+format
 │       └── strict/          ← pre-commit: +fta (padrão)
 └── tests/
-    ├── test.sh              ← 147 checks (bash)
+    ├── test.sh              ← 164 checks (bash)
     └── test.ps1             ← equivalente PowerShell
 ```
 
@@ -363,7 +371,7 @@ rn-harness/
 | Skill | O que faz |
 |-------|-----------|
 | `new-rn-project` | Wizard de init: detecta stack, cria estrutura, configura hooks e rules |
-| `rn-doctor` | 22 health checks + explica FAILs + executa fixes |
+| `rn-doctor` | 24 health checks + explica FAILs + executa fixes |
 
 ### Skills de marketplace (instalar separadamente)
 
@@ -425,7 +433,7 @@ Antes de build produção: `pnpm preflight` + Golden Paths manuais + `/rn-doctor
 Deletar manualmente e rodar `/new-rn-project` novamente, ou editar diretamente.
 
 **As knowledge rules são sempre todas copiadas?**
-Não — são seletivas. O wizard copia só as relevantes para a stack detectada. Projeto sem Supabase não recebe `supabase.md`. Se quiser todas: `/new-rn-project` em projeto sem `package.json` copia as 11.
+Não — são seletivas. O wizard copia só as relevantes para a stack detectada. Projeto sem Supabase não recebe `supabase.md`, sem expo-video não recebe `expo-video.md`. Se quiser todas: `/new-rn-project` em projeto sem `package.json` copia as 15.
 
 **Como mudar o hook profile depois de instalar?**
 ```bash
