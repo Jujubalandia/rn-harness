@@ -1,9 +1,9 @@
 ---
 name: rn-doctor
-description: Health check de projeto React Native. Roda 22 verificações (ambiente, versões, configs, segurança, git) e explica cada falha com comando de fix. Invocar quando: projeto não commita, build falha, suspeita de config errada, ou no início de cada dia de dev.
+description: Health check de projeto React Native. Roda 24 verificações (ambiente, versões, configs, segurança, git, padrões proibidos) e explica cada falha com comando de fix. Invocar quando: projeto não commita, build falha, suspeita de config errada, ou no início de cada dia de dev.
 ---
 
-# rn-doctor — Health Check
+# rn-doctor — Health Check (24 checks)
 
 > Skill instalada em `~/.claude/skills/rn-doctor/` pelo `install.sh` do rn-harness.
 
@@ -54,7 +54,7 @@ Para cada `[FAIL]` no output, explicar a causa raiz e executar o fix sugerido ap
 
 Para `[WARN]`, avaliar contexto: se projeto está em D1-D5 e ainda sem store build, warns de eas.json são irrelevantes.
 
-## Os 22 checks
+## Os 24 checks
 
 | # | Check | Nível se falhar |
 |---|-------|----------------|
@@ -80,6 +80,8 @@ Para `[WARN]`, avaliar contexto: se projeto está em D1-D5 e ainda sem store bui
 | 20 | git core.hooksPath = .githooks | FAIL |
 | 21 | app.json/app.config.ts tem bundleIdentifier + packageName | WARN |
 | 22 | eas.json presente | WARN |
+| 23 | `lineHeight` ausente em StyleSheet (bug Android) | FAIL |
+| 24 | `expo-av` não importado (deprecated) | FAIL |
 
 ## Fixes frequentes
 
@@ -147,6 +149,34 @@ git config core.hooksPath .githooks
 | D1 (setup) | nenhum | 6 (CLAUDE.md), 9 (rules), 21-22 (store) |
 | D3+ (dev) | nenhum | 21-22 (se ainda sem store config) |
 | D14+ (store prep) | nenhum | nenhum — todos devem ser OK |
+
+### FAIL 23: lineHeight
+
+```typescript
+// ❌ REMOVER
+lineHeight: 24,
+
+// ✅ SUBSTITUIR por
+paddingVertical: 4,
+```
+
+### FAIL 24: expo-av
+
+```bash
+# Remover expo-av
+pnpm remove expo-av
+# Instalar substitutos
+pnpm add expo-video expo-audio
+```
+
+```typescript
+// ❌ ANTES
+import { Video, Audio } from 'expo-av';
+
+// ✅ DEPOIS
+import { VideoView } from 'expo-video';
+import { useAudioPlayer } from 'expo-audio';
+```
 
 ## Referência dos scripts
 

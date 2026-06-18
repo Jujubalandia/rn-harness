@@ -130,6 +130,7 @@ assert_file "$REPO_DIR/templates/rules/security.md"                "rules/securi
 assert_file "$REPO_DIR/templates/rules/accessibility.md"           "rules/accessibility.md"
 assert_file "$REPO_DIR/templates/rules/styling.md"                 "rules/styling.md"
 assert_file "$REPO_DIR/templates/rules/react-native-gesture-handler.md" "rules/gesture-handler.md"
+assert_file "$REPO_DIR/templates/rules/forbidden.md"                       "rules/forbidden.md"
 
 for prefix in "01" "02" "03" "04" "05" "06"; do
   found=0
@@ -424,7 +425,9 @@ JSON_OUT=$(bash "$DOCTOR" --json "." 2>/dev/null || true)
 echo "$JSON_OUT" | python3 -c "import sys,json; d=json.load(sys.stdin); assert 'ok' in d and 'fail' in d and 'results' in d" 2>/dev/null   && pass "doctor.sh --json produz JSON valido"   || fail "doctor.sh --json nao produz JSON valido"
 
 # SKILL.md: conteúdo
-assert_has "$DOCTOR_SKILL" '22'   "rn-doctor SKILL.md menciona 22 checks"
+assert_has "$DOCTOR_SKILL" '24'   "rn-doctor SKILL.md menciona 24 checks"
+assert_has "$DOCTOR"       'lineHeight'   "doctor.sh checa lineHeight"
+assert_has "$DOCTOR"       'expo-av'      "doctor.sh checa expo-av"
 assert_has "$DOCTOR_SKILL" 'doctor.sh'   "rn-doctor SKILL.md referencia doctor.sh"
 assert_has "$DOCTOR_SKILL" 'doctor.ps1'   "rn-doctor SKILL.md referencia doctor.ps1"
 

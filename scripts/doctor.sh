@@ -286,6 +286,30 @@ else
   fi
 fi
 
+# ── 23. lineHeight em StyleSheet (bug Android) ───────────────────────────────
+if [ -d "$PROJECT_DIR" ]; then
+  LINEH=$(grep -rn --include='*.ts' --include='*.tsx' --include='*.js' \
+    'lineHeight' "$PROJECT_DIR" 2>/dev/null \
+    | grep -v 'node_modules\|\.test\.\|\.d\.ts' | head -1)
+  if [ -z "$LINEH" ]; then
+    _out OK 23 "sem lineHeight em StyleSheet (Android-safe)"
+  else
+    _out FAIL 23 "lineHeight detectado: $(echo "$LINEH" | head -1 | cut -c1-80)" "Substituir por paddingVertical/marginVertical (lineHeight corta texto em Android)"
+  fi
+fi
+
+# ── 24. expo-av importado (deprecated) ───────────────────────────────────────
+if [ -d "$PROJECT_DIR" ]; then
+  EXPOAV=$(grep -rn --include='*.ts' --include='*.tsx' --include='*.js' \
+    "from 'expo-av'" "$PROJECT_DIR" 2>/dev/null \
+    | grep -v 'node_modules\|\.test\.' | head -1)
+  if [ -z "$EXPOAV" ]; then
+    _out OK 24 "expo-av não usado (usar expo-video + expo-audio)"
+  else
+    _out FAIL 24 "expo-av importado (deprecated): $(echo "$EXPOAV" | head -1 | cut -c1-80)" "Migrar para expo-video (vídeo) e expo-audio (áudio)"
+  fi
+fi
+
 # ── Summary ───────────────────────────────────────────────────────────────────
 TOTAL=$((OK + WARN + FAIL))
 

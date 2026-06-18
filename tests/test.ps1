@@ -164,6 +164,7 @@ Assert-File "$RepoDir\templates\rules\security.md"                 "rules\\secur
 Assert-File "$RepoDir\templates\rules\accessibility.md"            "rules\\accessibility.md"
 Assert-File "$RepoDir\templates\rules\styling.md"                  "rules\\styling.md"
 Assert-File "$RepoDir\templates\rules\react-native-gesture-handler.md" "rules\\gesture-handler.md"
+Assert-File "$RepoDir\templates\rules\forbidden.md"                        "rules\\forbidden.md"
 
 foreach ($prefix in "01","02","03","04","05","06") {
     $found = Get-ChildItem "$RepoDir\templates\docs\${prefix}-*.md" -ErrorAction SilentlyContinue
@@ -417,7 +418,9 @@ Assert-Has $DoctorPs1 'expo-secure-store'      "doctor.ps1 checa expo-secure-sto
 Assert-Has $DoctorPs1 'core.hooksPath'         "doctor.ps1 checa git hooks"
 Assert-Has $DoctorPs1 '\-Json'                 "doctor.ps1 suporta -Json"
 Assert-Lacks $DoctorPs1 'expo-doctor'          "doctor.ps1 nao depende de expo-doctor externo"
-Assert-Has $DoctorSkill '22'                   "rn-doctor SKILL.md menciona 22 checks"
+Assert-Has $DoctorPs1 'lineHeight'             "doctor.ps1 checa lineHeight"
+Assert-Has $DoctorPs1 'expo-av'               "doctor.ps1 checa expo-av"
+Assert-Has $DoctorSkill '24'                   "rn-doctor SKILL.md menciona 24 checks"
 Assert-Has $DoctorSkill 'doctor.sh'            "rn-doctor SKILL.md referencia doctor.sh"
 Assert-Has $DoctorSkill 'doctor.ps1'           "rn-doctor SKILL.md referencia doctor.ps1"
 

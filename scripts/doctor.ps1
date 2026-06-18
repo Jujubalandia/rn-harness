@@ -291,6 +291,28 @@ if (Test-Path (Join-Path $ProjectDir "eas.json")) {
     Out-Check 22 "WARN" "eas.json ausente (opcional)" "eas build:configure quando pronto para store"
 }
 
+# 23. lineHeight em StyleSheet (bug Android)
+$lineH = Get-ChildItem -Path $ProjectDir -Recurse -Include '*.ts','*.tsx','*.js' -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch 'node_modules|\.test\.|\.d\.ts' } |
+    Select-String -Pattern 'lineHeight' -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+if ($lineH) {
+    Out-Check 23 "FAIL" "lineHeight detectado: $($lineH.Filename):$($lineH.LineNumber)" "Substituir por paddingVertical/marginVertical (lineHeight corta texto em Android)"
+} else {
+    Out-Check 23 "OK" "sem lineHeight em StyleSheet (Android-safe)"
+}
+
+# 24. expo-av importado (deprecated)
+$expoAv = Get-ChildItem -Path $ProjectDir -Recurse -Include '*.ts','*.tsx','*.js' -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch 'node_modules|\.test\.' } |
+    Select-String -Pattern "from 'expo-av'" -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+if ($expoAv) {
+    Out-Check 24 "FAIL" "expo-av importado (deprecated): $($expoAv.Filename)" "Migrar para expo-video (video) e expo-audio (audio)"
+} else {
+    Out-Check 24 "OK" "expo-av nao usado (usar expo-video + expo-audio)"
+}
+
 # ── Summary ──────────────────────────────────────────────────────────────────
 $total = $OkCount + $WarnCount + $FailCount
 
