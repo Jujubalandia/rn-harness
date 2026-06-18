@@ -407,6 +407,12 @@ Assert-Has $SkillPath 'expo-notifications.md' `
     "SKILL.md referencia expo-notifications.md"
 Assert-Has $SkillPath 'seletivamente' `
     "SKILL.md copia rules seletivamente"
+$RouterRule = "$RepoDir\templates\rules\expo-router.md"
+Assert-Has $RouterRule 'NativeTabs'           "expo-router.md tem secao NativeTabs"
+Assert-Has $RouterRule 'sfSymbol'             "expo-router.md tem pares SF Symbol"
+Assert-Has $RouterRule 'materialIcon'         "expo-router.md tem pares Material Icon"
+Assert-Has $RouterRule 'unstable-native-tabs' "expo-router.md usa unstable-native-tabs"
+
 Assert-Has $SkillPath 'HOOK_PROFILE' `
     "SKILL.md referencia HOOK_PROFILE"
 Assert-Has $SkillPath '.rn-harness/.profile' `

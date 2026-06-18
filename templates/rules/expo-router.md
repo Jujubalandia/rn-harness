@@ -88,6 +88,66 @@ export default {
 // Incoming: myapp://bracket/123 → app/bracket/[id].tsx with id='123'
 ```
 
+## NativeTabs (preferred over legacy Tabs)
+
+`expo-router/unstable-native-tabs` renders native UITabBar (iOS) and BottomNavigationView (Android) — better performance, platform-correct animations.
+
+```tsx
+// app/(tabs)/_layout.tsx
+import { NativeTabs, NativeTabsContent } from 'expo-router/unstable-native-tabs';
+
+export default function TabLayout() {
+  return (
+    <NativeTabs>
+      <NativeTabsContent
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: { sfSymbol: 'house.fill', materialIcon: 'home' },
+        }}
+      />
+      <NativeTabsContent
+        name="explore"
+        options={{
+          title: 'Explorar',
+          tabBarIcon: { sfSymbol: 'safari.fill', materialIcon: 'explore' },
+        }}
+      />
+      <NativeTabsContent
+        name="profile"
+        options={{
+          title: 'Perfil',
+          tabBarIcon: { sfSymbol: 'person.crop.circle.fill', materialIcon: 'account_circle' },
+        }}
+      />
+    </NativeTabs>
+  );
+}
+```
+
+## SF Symbols (iOS) ↔ Material Design (Android) icon pairs
+
+| Conceito | SF Symbol (iOS) | Material Icon (Android) |
+|----------|----------------|------------------------|
+| Home | `house.fill` | `home` |
+| Search / Explorar | `safari.fill` | `explore` |
+| Perfil / Conta | `person.crop.circle.fill` | `account_circle` |
+| Configurações | `gearshape.fill` | `settings` |
+| Favoritos | `heart.fill` | `favorite` |
+| Notificações | `bell.fill` | `notifications` |
+| Adicionar | `plus.circle.fill` | `add_circle` |
+| Compartilhar | `square.and.arrow.up` | `share` |
+| Bracket / Trophy | `trophy.fill` | `emoji_events` |
+| Calendário | `calendar` | `calendar_month` |
+| Chat / Mensagem | `bubble.left.fill` | `chat` |
+| Mapa | `map.fill` | `map` |
+| Câmera | `camera.fill` | `photo_camera` |
+| Estatísticas | `chart.bar.fill` | `bar_chart` |
+| Voltar | `chevron.left` | `arrow_back` |
+| Fechar | `xmark` | `close` |
+| Check | `checkmark.circle.fill` | `check_circle` |
+| Alerta | `exclamationmark.triangle.fill` | `warning` |
+
 ## Common Mistakes
 
 ```tsx
@@ -102,4 +162,7 @@ export default {
 
 // ❌ Use useRouter for simple back
 router.back(); // ✅ not useRouter().back()
+
+// ❌ Legacy Tabs when NativeTabs is available
+import { Tabs } from 'expo-router'; // use NativeTabs instead
 ```

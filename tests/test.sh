@@ -363,6 +363,15 @@ assert_has "$SKILL" 'expo-notifications.md' \
 assert_has "$SKILL" 'seletivamente' \
   "SKILL.md copia rules seletivamente"
 
+assert_has "$REPO_DIR/templates/rules/expo-router.md" 'NativeTabs' \
+  "expo-router.md tem secao NativeTabs"
+assert_has "$REPO_DIR/templates/rules/expo-router.md" 'sfSymbol' \
+  "expo-router.md tem pares SF Symbol"
+assert_has "$REPO_DIR/templates/rules/expo-router.md" 'materialIcon' \
+  "expo-router.md tem pares Material Icon"
+assert_has "$REPO_DIR/templates/rules/expo-router.md" 'unstable-native-tabs' \
+  "expo-router.md usa unstable-native-tabs"
+
 assert_has "$SKILL" 'HOOK_PROFILE'   "SKILL.md referencia HOOK_PROFILE"
 assert_has "$SKILL" '.rn-harness/.profile'   "SKILL.md le .profile do harness"
 assert_has "$SKILL" 'profiles/'   "SKILL.md usa hooks/profiles/"
