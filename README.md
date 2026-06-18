@@ -153,6 +153,39 @@ Exit 0 = nenhum FAIL (OK e WARN passam). Exit 1 = pelo menos um FAIL.
 
 ---
 
+## Segurança Claude Code
+
+Dois mecanismos complementares bloqueiam operações destrutivas antes de execução:
+
+### `settings.json` — allowlist/denylist declarativa
+
+Criado em `.claude/settings.json` pelo `/new-rn-project`. Bloqueia sem prompt:
+
+```json
+{ "permissions": { "deny": [
+  "Bash(eas submit*)",
+  "Bash(supabase db reset*)",
+  "Bash(git push --force*)",
+  "Bash(git commit *--no-verify*)",
+  "Bash(rm -rf /*)"
+]}}
+```
+
+### `.claude/hooks/pre-tool-use.sh` — bloqueio em runtime
+
+Script executado pelo Claude Code antes de cada ferramenta. Intercepta padrões destrutivos não cobertos pelo `settings.json` (ex: variantes de comando, SQL):
+
+```
+🚫 BLOQUEADO: 'supabase db reset' requer confirmação explícita.
+   Execute manualmente no terminal se tiver certeza.
+```
+
+Padrões bloqueados: `eas submit`, `supabase db reset`, `git push --force`, `git commit --no-verify`, `rm -rf /`, `git reset --hard`, `DROP TABLE`, `truncate cascade`, `npx expo publish`.
+
+Ambos os arquivos são copiados pelo `/new-rn-project` de `~/.claude/templates/rn-20days/claude/`.
+
+---
+
 ## Hook Profiles
 
 Três níveis de quality gates, selecionáveis na instalação:
@@ -301,7 +334,11 @@ rn-harness/
 │   │   ├── 04-testing.md    ← tiers de teste + device matrix
 │   │   ├── 05-store-launch.md   ← checklist App Store + Play Store
 │   │   └── 06-marketing.md  ← calendário D-7→D+14
-│   └── rules/               ← 15 knowledge rules (copiadas seletivamente)
+│   ├── rules/               ← 15 knowledge rules (copiadas seletivamente)
+│   └── claude/
+│       ├── settings.json        ← denylist de ops destrutivas
+│       └── hooks/
+│           └── pre-tool-use.sh  ← bloqueio runtime por padrão
 ├── skills/
 │   ├── new-rn-project/      ← wizard: init, stack detection, rules, hooks
 │   └── rn-doctor/           ← health check: 24 checks + fixes

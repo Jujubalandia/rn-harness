@@ -168,6 +168,8 @@ Assert-File "$RepoDir\templates\rules\forbidden.md"                        "rule
 Assert-File "$RepoDir\templates\rules\expo-video.md"                         "rules\\expo-video.md"
 Assert-File "$RepoDir\templates\rules\revenue-cat.md"                          "rules\\revenue-cat.md"
 Assert-File "$RepoDir\templates\rules\expo-notifications.md"                   "rules\\expo-notifications.md"
+Assert-File "$RepoDir\templates\claude\settings.json"                              "claude\\settings.json"
+Assert-File "$RepoDir\templates\claude\hooks\pre-tool-use.sh"                     "claude\\hooks\\pre-tool-use.sh"
 
 foreach ($prefix in "01","02","03","04","05","06") {
     $found = Get-ChildItem "$RepoDir\templates\docs\${prefix}-*.md" -ErrorAction SilentlyContinue
@@ -405,6 +407,16 @@ Assert-Has $SkillPath 'revenue-cat.md' `
     "SKILL.md referencia revenue-cat.md"
 Assert-Has $SkillPath 'expo-notifications.md' `
     "SKILL.md referencia expo-notifications.md"
+Assert-Has $SkillPath 'settings.json' `
+    "SKILL.md referencia settings.json"
+Assert-Has $SkillPath 'pre-tool-use.sh' `
+    "SKILL.md referencia pre-tool-use.sh"
+$SettingsJson = "$RepoDir\templates\claude\settings.json"
+Assert-Has $SettingsJson 'eas submit'  "settings.json bloqueia eas submit"
+Assert-Has $SettingsJson 'deny'        "settings.json tem secao deny"
+$PreHook = "$RepoDir\templates\claude\hooks\pre-tool-use.sh"
+Assert-Has $PreHook 'BLOQUEADO'           "pre-tool-use.sh tem mensagem de bloqueio"
+Assert-Has $PreHook 'supabase db reset'   "pre-tool-use.sh bloqueia supabase db reset"
 Assert-Has $SkillPath 'seletivamente' `
     "SKILL.md copia rules seletivamente"
 $RouterRule = "$RepoDir\templates\rules\expo-router.md"

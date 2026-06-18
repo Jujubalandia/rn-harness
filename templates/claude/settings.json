@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(eas submit*)",
+      "Bash(supabase db reset --linked*)",
+      "Bash(supabase db reset*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f *)",
+      "Bash(git commit *--no-verify*)",
+      "Bash(git commit *-n *)",
+      "Bash(git rebase -i*)",
+      "Bash(rm -rf /*)",
+      "Bash(npx expo publish*)"
+    ]
+  }
+}

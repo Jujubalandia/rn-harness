@@ -200,7 +200,21 @@ Criar `docs/` se nao existir. Copiar sem substituicao.
 **E. `.githooks/pre-commit`** — de `~/.rn-harness/hooks/pre-commit.sh`
 **F. `.githooks/pre-push`** — de `~/.rn-harness/hooks/pre-push.sh`
 
-**G. `.claude/rules/`** — copiar de `~/.claude/templates/rn-20days/rules/`
+**G. `.claude/settings.json`** — de `~/.claude/templates/rn-20days/claude/settings.json`
+
+Bloqueia operações destrutivas (eas submit, db reset, force push, --no-verify).
+Criar apenas se `.claude/settings.json` não existir.
+
+**H. `.claude/hooks/pre-tool-use.sh`** — de `~/.claude/templates/rn-20days/claude/hooks/pre-tool-use.sh`
+
+```bash
+mkdir -p .claude/hooks
+cp ~/.claude/templates/rn-20days/claude/settings.json .claude/settings.json
+cp ~/.claude/templates/rn-20days/claude/hooks/pre-tool-use.sh .claude/hooks/pre-tool-use.sh
+chmod +x .claude/hooks/pre-tool-use.sh
+```
+
+**I. `.claude/rules/`** — copiar de `~/.claude/templates/rn-20days/rules/`
 
 Criar `.claude/rules/` e copiar **seletivamente** com base na stack detectada:
 

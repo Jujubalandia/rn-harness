@@ -134,6 +134,8 @@ assert_file "$REPO_DIR/templates/rules/forbidden.md"                       "rule
 assert_file "$REPO_DIR/templates/rules/expo-video.md"                     "rules/expo-video.md"
 assert_file "$REPO_DIR/templates/rules/revenue-cat.md"                    "rules/revenue-cat.md"
 assert_file "$REPO_DIR/templates/rules/expo-notifications.md"             "rules/expo-notifications.md"
+assert_file "$REPO_DIR/templates/claude/settings.json"                    "claude/settings.json"
+assert_file "$REPO_DIR/templates/claude/hooks/pre-tool-use.sh"            "claude/hooks/pre-tool-use.sh"
 
 for prefix in "01" "02" "03" "04" "05" "06"; do
   found=0
@@ -362,6 +364,20 @@ assert_has "$SKILL" 'expo-notifications.md' \
   "SKILL.md referencia expo-notifications.md"
 assert_has "$SKILL" 'seletivamente' \
   "SKILL.md copia rules seletivamente"
+assert_has "$SKILL" 'settings.json' \
+  "SKILL.md referencia settings.json"
+assert_has "$SKILL" 'pre-tool-use.sh' \
+  "SKILL.md referencia pre-tool-use.sh"
+
+# settings.json conteúdo
+assert_has "$REPO_DIR/templates/claude/settings.json" 'eas submit' \
+  "settings.json bloqueia eas submit"
+assert_has "$REPO_DIR/templates/claude/settings.json" 'deny' \
+  "settings.json tem secao deny"
+assert_has "$REPO_DIR/templates/claude/hooks/pre-tool-use.sh" 'BLOQUEADO' \
+  "pre-tool-use.sh tem mensagem de bloqueio"
+assert_has "$REPO_DIR/templates/claude/hooks/pre-tool-use.sh" 'supabase db reset' \
+  "pre-tool-use.sh bloqueia supabase db reset"
 
 assert_has "$REPO_DIR/templates/rules/expo-router.md" 'NativeTabs' \
   "expo-router.md tem secao NativeTabs"
