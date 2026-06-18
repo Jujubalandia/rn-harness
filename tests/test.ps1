@@ -166,6 +166,8 @@ Assert-File "$RepoDir\templates\rules\styling.md"                  "rules\\styli
 Assert-File "$RepoDir\templates\rules\react-native-gesture-handler.md" "rules\\gesture-handler.md"
 Assert-File "$RepoDir\templates\rules\forbidden.md"                        "rules\\forbidden.md"
 Assert-File "$RepoDir\templates\rules\expo-video.md"                         "rules\\expo-video.md"
+Assert-File "$RepoDir\templates\rules\revenue-cat.md"                          "rules\\revenue-cat.md"
+Assert-File "$RepoDir\templates\rules\expo-notifications.md"                   "rules\\expo-notifications.md"
 
 foreach ($prefix in "01","02","03","04","05","06") {
     $found = Get-ChildItem "$RepoDir\templates\docs\${prefix}-*.md" -ErrorAction SilentlyContinue
@@ -397,6 +399,12 @@ Assert-Has $SkillPath 'expo install --fix' `
     "SKILL.md inclui expo install --fix"
 Assert-Has $SkillPath 'expo-video.md' `
     "SKILL.md referencia expo-video.md"
+Assert-Has $SkillPath 'NOTIFICATIONS' `
+    "SKILL.md tem deteccao de notifications"
+Assert-Has $SkillPath 'revenue-cat.md' `
+    "SKILL.md referencia revenue-cat.md"
+Assert-Has $SkillPath 'expo-notifications.md' `
+    "SKILL.md referencia expo-notifications.md"
 Assert-Has $SkillPath 'seletivamente' `
     "SKILL.md copia rules seletivamente"
 Assert-Has $SkillPath 'HOOK_PROFILE' `

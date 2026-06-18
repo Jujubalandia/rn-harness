@@ -84,6 +84,10 @@ MONETIZATION:
   "react-native-iap"        → react-native-iap
   else                      → "(nenhum)"
 
+NOTIFICATIONS:
+  "expo-notifications"  → expo-notifications
+  else                  → "(nenhum)"
+
 EXTRAS (para LIBS_ADICIONAIS):
   expo-camera, expo-maps, react-native-maps, react-hook-form,
   expo-sharing, expo-haptics
@@ -106,6 +110,7 @@ Image gen        : Skia              (detectado)
 Testing          : RNTL              (detectado)
 Video            : expo-video        (detectado)
 Monetization     : RevenueCat        (detectado)
+Notifications    : expo-notifications (detectado)
 Extras           : expo-haptics, expo-sharing
 ─────────────────────────────────────────────
 Enter para confirmar ou informe correções:
@@ -213,9 +218,11 @@ Criar `.claude/rules/` e copiar **seletivamente** com base na stack detectada:
 | `react-native-gesture-handler.md` | GESTURE = Gesture Handler |
 | `styling.md` | STYLING = StyleSheet.create |
 | `expo-video.md` | VIDEO = expo-video |
+| `revenue-cat.md` | MONETIZATION = RevenueCat |
+| `expo-notifications.md` | NOTIFICATIONS = expo-notifications |
 | `forbidden.md` | **sempre** |
 
-Se projeto novo (sem package.json): copiar **todos os 13** como base.
+Se projeto novo (sem package.json): copiar **todos os 15** como base.
 
 ---
 
