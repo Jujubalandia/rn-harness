@@ -74,6 +74,16 @@ TESTING:
   "detox"                         → Detox
   else                            → "(nenhum)"
 
+VIDEO:
+  "expo-video"  → expo-video (SDK 56+)
+  "expo-av"     → expo-av AVISO: deprecated — migrar para expo-video + expo-audio
+  else          → "(nenhum)"
+
+MONETIZATION:
+  "react-native-purchases"  → RevenueCat
+  "react-native-iap"        → react-native-iap
+  else                      → "(nenhum)"
+
 EXTRAS (para LIBS_ADICIONAIS):
   expo-camera, expo-maps, react-native-maps, react-hook-form,
   expo-sharing, expo-haptics
@@ -94,6 +104,8 @@ Gesture          : Gesture Handler   (detectado)
 Storage          : expo-secure-store (detectado)
 Image gen        : Skia              (detectado)
 Testing          : RNTL              (detectado)
+Video            : expo-video        (detectado)
+Monetization     : RevenueCat        (detectado)
 Extras           : expo-haptics, expo-sharing
 ─────────────────────────────────────────────
 Enter para confirmar ou informe correções:
@@ -200,8 +212,10 @@ Criar `.claude/rules/` e copiar **seletivamente** com base na stack detectada:
 | `react-native-reanimated.md` | ANIMATION = Reanimated v3 |
 | `react-native-gesture-handler.md` | GESTURE = Gesture Handler |
 | `styling.md` | STYLING = StyleSheet.create |
+| `expo-video.md` | VIDEO = expo-video |
+| `forbidden.md` | **sempre** |
 
-Se projeto novo (sem package.json): copiar **todos os 11** como base.
+Se projeto novo (sem package.json): copiar **todos os 13** como base.
 
 ---
 
@@ -255,6 +269,12 @@ Gerar comando `pnpm add` incluindo **apenas o que NAO foi detectado**:
 - zustand (se STATE_MGMT nao e Zustand instalado)
 - i18next react-i18next expo-localization (se I18N nao detectado)
 - @supabase/supabase-js (se BACKEND nao e Supabase instalado)
+
+Sempre incluir ao final da instalação de dependências:
+```bash
+npx expo install --fix
+```
+(corrige versoes incompativeis com o SDK 56 automaticamente)
 
 Sempre incluir:
 

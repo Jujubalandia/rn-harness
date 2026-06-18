@@ -131,6 +131,7 @@ assert_file "$REPO_DIR/templates/rules/accessibility.md"           "rules/access
 assert_file "$REPO_DIR/templates/rules/styling.md"                 "rules/styling.md"
 assert_file "$REPO_DIR/templates/rules/react-native-gesture-handler.md" "rules/gesture-handler.md"
 assert_file "$REPO_DIR/templates/rules/forbidden.md"                       "rules/forbidden.md"
+assert_file "$REPO_DIR/templates/rules/expo-video.md"                     "rules/expo-video.md"
 
 for prefix in "01" "02" "03" "04" "05" "06"; do
   found=0
@@ -343,6 +344,14 @@ assert_has "$SKILL" 'NAVIGATION' \
   "SKILL.md tem deteccao de navigation"
 assert_has "$SKILL" 'BACKEND' \
   "SKILL.md tem deteccao de backend"
+assert_has "$SKILL" 'VIDEO' \
+  "SKILL.md tem deteccao de video"
+assert_has "$SKILL" 'MONETIZATION' \
+  "SKILL.md tem deteccao de monetizacao"
+assert_has "$SKILL" 'expo install --fix' \
+  "SKILL.md inclui expo install --fix"
+assert_has "$SKILL" 'expo-video.md' \
+  "SKILL.md referencia expo-video.md"
 assert_has "$SKILL" 'seletivamente' \
   "SKILL.md copia rules seletivamente"
 
