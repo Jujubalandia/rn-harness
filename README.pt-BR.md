@@ -414,19 +414,21 @@ rn-harness/
 
 ### Skills de marketplace (instalar separadamente)
 
-| Skill | Provider |
-|-------|----------|
-| `react-native-best-practices` | callstack (Software Mansion) |
-| `zafer-skills` | thedotmack |
-| `expo-debugger` | callstack |
-| `design-token-guardian` | plugin |
-| `i18n-validator` | plugin |
-| `store-metadata-reviewer` | plugin |
-| `qa-tester` | plugin |
-| `marketing-copywriter` | plugin |
-| `viral-content-strategist` | plugin |
-| `supabase-migrator` | plugin |
-| `firecrawl-*` | firecrawl MCP |
+| Skill | Provider | Quando |
+|-------|----------|--------|
+| `firecrawl-search` / `firecrawl-scrape` | firecrawl MCP | D1-D2 |
+| `design-token-guardian` | plugin | D3+ |
+| `i18n-validator` | plugin | D3+ |
+| `expo-debugger` | callstack | D4+ |
+| `auth-assessment` | plugin | D4+ |
+| `secure-storage-audit` | plugin | D4+ |
+| `supabase-migrator` | plugin | D4+ |
+| `code-review` | plugin | pre-commit |
+| `qa-tester` | plugin | D13-D15 |
+| `store-metadata-reviewer` | plugin | D15 |
+| `marketing-copywriter` | plugin | D17 |
+| `viral-content-strategist` | plugin | D18 |
+| `privacy-audit` | plugin | pós-D20 |
 
 ---
 
