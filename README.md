@@ -6,6 +6,8 @@ Development framework to ship React Native apps to the App Store + Play Store in
 
 Built on Claude Code with specialized skills, quality gates, and a project initialization wizard.
 
+New here? See [Getting Started](docs/GETTING_STARTED.md) for the condensed empty-folder → shipped-app walkthrough.
+
 ---
 
 ## What it is
