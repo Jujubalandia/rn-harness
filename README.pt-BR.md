@@ -77,7 +77,7 @@ No Claude Code:
 | i18n | i18next + expo-localization |
 | Animation | Reanimated v3 |
 | Gesture | Gesture Handler v2 |
-| Storage | expo-secure-store (OK) · AsyncStorage (AVISO) |
+| Storage | só expo-secure-store (OK) · ambos presentes (AVISO) · só AsyncStorage (FAIL) |
 | Image gen | Skia · react-native-view-shot |
 | Testing | RNTL · Detox |
 | Video | expo-video (OK) · expo-av (AVISO: deprecated) |
