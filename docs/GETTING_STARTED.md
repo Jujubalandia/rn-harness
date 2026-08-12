@@ -63,7 +63,7 @@ Then:
 /rn-doctor
 ```
 
-24 checks, must exit clean (no FAILs) before moving on. Known contradiction to ignore/verify live: README currently says AsyncStorage-without-SecureStore is a WARNING, but the doctor script (`STRUCTURE.md`) treats it as FAIL — trust the doctor's actual exit code over the README wording.
+24 checks, must exit clean (no FAILs) before moving on. Storage check (#17) is 3-tier: secure-store only = OK, secure-store + AsyncStorage both present = WARN, AsyncStorage alone (no secure-store) = FAIL.
 
 ---
 
