@@ -581,6 +581,15 @@ Flow documented in `04-testing.md`: Appetize.io for smoke + borrowed iPhone for 
 **Does `/rn-doctor` modify files?**
 No — it only reads and reports. Fixes are suggested and executed only when invoked via `/rn-doctor` in Claude Code, with user confirmation.
 
+**What is the D1→D20 Step-by-Step table?**
+It's the operational reference in the [D1→D20 Step-by-Step](#d1d20-step-by-step) section: one row per command/step across the full 20-day flow, tagged with day, classification (Internal Claude / External / Skill / Manual Edit), input/output artifacts, and next step.
+
+**How does the PR workflow work (branch before main)?**
+Create a feature branch (`git checkout -b <name>`), commit there, push, and open a PR (`gh pr create`) for review before merging into `main`. Don't commit directly to `main`.
+
+**Is `/rn-doctor --json` reliable for CI?**
+Not yet — `tests/test.sh` currently has a known failing check ("doctor.sh --json nao produz JSON valido"). Treat `--json` output as unverified until that test passes; use the human-readable output for now.
+
 ---
 
 ## Contributing
