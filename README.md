@@ -386,6 +386,89 @@ rn-harness/
 
 ---
 
+## D1→D20 Step-by-Step
+
+Operational table: each command/step in the flow, which day it belongs to, its classification, input/output artifacts, and the next step.
+
+**Classification:**
+- **Internal Claude** — native Claude Code tool action executed automatically in the session (Read/Edit/Write), not a command typed by the user.
+- **External** — terminal/shell command or third-party tool outside Claude Code (npm, pnpm, eas, git, curl, store consoles).
+- **Skill** — `/command` or subagent invoked inside Claude Code (bundled or marketplace).
+- **Manual Edit** — manual content editing by the user in a file/doc, no command executed.
+
+| Day | Command | Classification | Artifact(s) touched/created | Resulting/modified artifact(s) | Next step |
+|-----|---------|-----------------|------------------------------|----------------------------------|-----------|
+| D1 | `nvm install 20` | External | Node.js (machine) | Node 20 LTS active | install pnpm |
+| D1 | `npm i -g pnpm` | External | — | pnpm CLI available | install Claude Code |
+| D1 | `npm i -g @anthropic-ai/claude-code` | External | — | Claude Code CLI installed | run rn-harness installer |
+| D1 | `curl -fsSL .../install.sh \| sh` | External | remote rn-harness repo | `~/.claude/templates/rn-20days/`, `~/.claude/skills/{new-rn-project,rn-doctor}`, `~/.rn-harness/scripts/`, `~/.rn-harness/.profile` | create project folder |
+| D1 | `mkdir ~/projects/my-app && cd ...` | External | filesystem | project directory | open Claude Code |
+| D1 | `claude` | External | — | Claude Code session open | run wizard |
+| D1 | `/new-rn-project` | Skill | `package.json` (if present) | `CLAUDE.md`, `DECISIONS.md`, `TODO.md`, `docs/01-spec.md`…`06-marketing.md`, `.githooks/`, `.claude/rules/`, `.claude/settings.json`, `.claude/hooks/pre-tool-use.sh` | run `/rn-doctor` |
+| D1 | `/rn-doctor` | Skill | CLAUDE.md, package.json, tsconfig.json, .env*, .git/, app.json, eas.json | 24-check report (OK/WARN/FAIL) | fix reported FAILs |
+| D1 | Fill prep checklist (problem, audience, competitors, differentiator, cut/keep, monetization, viral loop, risks) | Manual Edit | `docs/01-spec.md` (empty) | `docs/01-spec.md` with draft answers | research competitors (D2) |
+| D1 | `npx expo install --fix` | External | package.json / node_modules | versions compatible w/ SDK 56 | fix remaining doctor FAILs |
+| D2 | `/firecrawl-search` | Skill (marketplace) | search query | list of competitors | pick top 3 |
+| D2 | `/firecrawl-scrape` | Skill (marketplace) | competitor URL | extracted content | fill competitor table |
+| D2 | Fill competitors + Cut/Keep + diff + viral loop | Manual Edit | `docs/01-spec.md` | `docs/01-spec.md` complete (DoD D1-D2) | approve spec, move to D3 |
+| D3 | Define design system (colors, typography, 8pt grid) | Manual Edit | `docs/01-spec.md` | design system section filled | map screen flow |
+| D3 | Map screen flow (text) | Manual Edit | `docs/01-spec.md` | screen flow documented | create Expo project + Supabase |
+| D3 | `npx create-expo-app` + Supabase config | External | filesystem / Supabase dashboard | Expo project + Supabase client configured | implement auth |
+| D3 | Implement auth (Google/Apple/email) | Internal Claude | auth files/hooks | working login | implement navigation |
+| D3 | `design-token-guardian` (before committing styles) | Skill (subagent) | new style/screen files | hardcoded-color flag | fix, commit |
+| D3 | Implement navigation between screens | Internal Claude | route files | 2+ navigable screens | validate DoD D3 |
+| D3 | Test on physical Android (login + nav) | External (manual) | dev build on device | DoD D3 / Milestone M1 confirmed | start D4 |
+| D4 | Implement core feature 1 | Internal Claude | feature code | feature 1 working | `/code-review` |
+| D4 | `/code-review` | Skill (marketplace) | feature 1 diff | findings report | fix, commit |
+| D5 | Implement core feature 2 | Internal Claude | feature code | feature 2 working | `/code-review` |
+| D5 | `/code-review` | Skill | feature 2 diff | findings | fix, commit |
+| D6 | Implement core feature 3 | Internal Claude | feature code | feature 3 working | `/code-review` |
+| D6 | `/code-review` | Skill | feature 3 diff | findings | fix, commit |
+| D7 | Implement core feature 4 | Internal Claude | feature code | feature 4 working | `/code-review` |
+| D7 | `/code-review` | Skill | feature 4 diff | findings | fix, commit |
+| D8 | Implement core feature 5 | Internal Claude | feature code | feature 5 working | `/code-review` |
+| D8 | `/code-review` | Skill | feature 5 diff | findings | fix, commit |
+| D9 | Implement core feature 6 | Internal Claude | feature code | feature 6 working | `/code-review` |
+| D9 | `/code-review` | Skill | feature 6 diff | findings | fix, commit |
+| D4-D9 | `/auth-assessment` (when implementing/changing auth) | Skill (marketplace) | auth flow | gaps report | fix findings |
+| D4-D9 | `/secure-storage-audit` (when storing sensitive data) | Skill (marketplace) | storage code | compliance report | migrate to SecureStore if needed |
+| D4-D9 | `supabase-migrator` (new migration) | Skill (subagent) | SQL migration file | reviewed migration | apply on Supabase |
+| D4-D9 | `expo-debugger` (EAS build/Metro stuck) | Skill (subagent) | build/Metro logs | root cause + suggested fix | apply fix, re-run |
+| D10 | Buffer/catchup on delayed features | Internal Claude / Manual Edit | pending code | features complete | test e2e flow |
+| D10 | Test main flow end-to-end (physical Android) | External (manual) | dev build | DoD D10 / Milestone M3 confirmed | start D11 |
+| D11 | Complete i18n (PT-BR + extra languages) | Internal Claude | strings/screens | text using `t()` | `i18n-validator` |
+| D11 | `i18n-validator` (UI text w/o `t()`) | Skill (subagent) | screen files | hardcoded-strings report | fix remaining strings |
+| D12 | Add `accessibilityLabel` to interactive elements | Internal Claude | UI components | a11y labels present | loading/error states |
+| D12 | Implement loading + error states on all screens | Internal Claude | screens | loading/error UX | haptic feedback |
+| D13 | Haptic feedback on main interactions | Internal Claude | interactive components | haptics applied | tune performance |
+| D13 | Tune performance (bundle <3MB, TTI <2s) + splash/icon | Internal Claude / Manual Edit (assets) | bundle config, assets/icon.png | optimized app + icon/splash ready | run quality gates |
+| D13 | `pnpm quality:full` | External | project code | zero-error report (or failures) | fix failures, preflight |
+| D13 | `pnpm preflight` | External | local production build | preflight OK | validate Golden Paths |
+| D13 | Validate Golden Paths GP-1..GP-5 (physical Android) | External (manual) | app on device | DoD D13 confirmed | start D14 |
+| D14 | `eas build --profile production` (Android + iOS) | External | eas.json / code | production AAB/IPA | test Golden Paths on prod build |
+| D14 | Test Golden Paths on production build | External (manual) | installed AAB/IPA | crash-free validation | capture screenshots |
+| D14 | Capture store screenshots | External (manual) | running app | images for `05-store-launch.md` | fill metadata |
+| D15 | Fill store metadata | Manual Edit | `docs/05-store-launch.md` | complete metadata | publish privacy policy |
+| D15 | Publish Privacy Policy (URL) | External | privacy policy page | public URL | run store-metadata-reviewer |
+| D15 | `store-metadata-reviewer` | Skill (subagent) | metadata + screenshots | compliance report | fix findings |
+| D15 | `/rn-doctor` (before final build) | Skill | project (24 checks) | report with no FAILs | validate DoD D15 |
+| D15 | Confirm DoD D15 / Milestone M4 | External (manual) | production build installed | Milestone M4 confirmed | start D16 |
+| D16 | Upload AAB → internal track (Google Play Console) | External (irreversible) | production AAB | release on internal track | promote to production |
+| D16 | Promote release to production (Google Play) | External (irreversible) | internal track release | app in review on Play Store | answer compliance |
+| D17 | Xcode Archive → upload to TestFlight | External (irreversible) | iOS build | build on TestFlight | submit for review |
+| D17 | App Store submission (App Store Connect) | External (irreversible) | TestFlight build | app in review on App Store | answer compliance |
+| D17 | Answer compliance questions (both stores) | Manual Edit/External | store forms | compliance answered | log build number |
+| D17 | Log build number/status in DECISIONS.md | Manual Edit | `DECISIONS.md` | record saved (DoD D17, M5) | start D18 |
+| D18 | Publish landing page (GitHub Pages/Vercel) | External | 1 static page | landing page live | prepare posts |
+| D18 | `marketing-copywriter` | Skill (subagent) | app briefing | per-platform copy | review/schedule posts |
+| D18 | `viral-content-strategist` | Skill (subagent) | app/audience context | viral content concept | create D-1/D0 posts |
+| D19 | Publish D-1/D0 posts (Reddit, social) | External (manual) | ready copy | posts published | monitor reaction |
+| D20 | Create Product Hunt listing | External (manual) | assets + copy | listing published | track metrics |
+| D20 | Publish D+3/D+7 posts (scheduled) | External (manual) | ready copy | posts published | log metrics |
+| D20 | Log D+7 metrics in DECISIONS.md | Manual Edit | `DECISIONS.md` | metrics logged (DoD D20) | close milestone / v1.1 |
+
+---
+
 ## Skills — When to use which
 
 | Phase | Trigger | Skill | How to invoke |
@@ -446,7 +529,7 @@ Pre-commit blocks based on the **active profile** (see Hook Profiles):
 
 Before push (all profiles): `pnpm quality:full` (typecheck + lint + format + fta + tests).
 
-Before production build: `pnpm preflight` + manual Golden Paths + `/rn-doctor` with no FAILs.
+Before production build: `pnpm preflight` + manual Golden Paths (5 critical flows, defined in `docs/03-quality-gates.md`) + `/rn-doctor` with no FAILs.
 
 **FTA ≥ 60?** Refactor: extract sub-components, custom hooks, lookup tables. **Never** raise the score_cap.
 

@@ -89,7 +89,7 @@ Marketplace skills are NOT bundled by the installer — install separately when 
 ## 4. Known sharp edges (don't re-debug these)
 
 - **"FTA ≥ 60"** (quality gate, D11-13) — FTA = code complexity score from the `fta` tool; the rule is "never raise the ceiling to make a failing check pass, fix the code instead."
-- **`/new-rn-project --force`** — mentioned in README FAQ but the flag doesn't exist. To re-run wizard on a dir it already touched: delete `CLAUDE.md` manually first.
+- **`/new-rn-project` has no `--force` flag** — don't confuse with `install.sh --force` (real, but only re-installs templates globally). To re-run the wizard on a dir it already touched: delete `CLAUDE.md` manually first, per README FAQ.
 - **Destructive-op blocking** (`.claude/settings.json` + `.claude/hooks/pre-tool-use.sh`) — to allow a currently-blocked pattern (e.g. a specific `git push --force`), edit `.claude/hooks/pre-tool-use.sh` directly in your project, not the installer.
 - **Windows** — hooks are `.sh`, run via Git Bash. If you're on WSL instead, no documented fallback yet — test before relying on hooks.
 
