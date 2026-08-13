@@ -12,10 +12,14 @@ Full reference stays in [README.md](../README.md) — this is the condensed walk
 nvm install 20              # Node 20 LTS
 npm i -g pnpm
 npm i -g @anthropic-ai/claude-code
-curl -fsSL https://raw.githubusercontent.com/Jujubalandia/rn-harness/main/install.sh | sh
 ```
 
-Installer drops templates at `~/.claude/templates/rn-20days/`, skills at `~/.claude/skills/`, saves your hook profile to `~/.rn-harness/.profile` (defaults to `strict` if you skip choosing one).
+```
+/plugin marketplace add Jujubalandia/rn-harness
+/plugin install rn-harness@rn-harness
+```
+
+Everything (templates, skills, doctor scripts, git hook profiles) ships inside the plugin — nothing to place manually. Your hook profile choice, once picked in the wizard, is remembered across projects (defaults to `strict` if you skip choosing one).
 
 ---
 
@@ -46,7 +50,7 @@ claude
 Inside Claude Code:
 
 ```
-/new-rn-project
+/rn-harness:new-rn-project
 ```
 
 What it does, in order:
@@ -60,7 +64,7 @@ What it does, in order:
 Then:
 
 ```
-/rn-doctor
+/rn-harness:rn-doctor
 ```
 
 24 checks, must exit clean (no FAILs) before moving on. Storage check (#17) is 3-tier: secure-store only = OK, secure-store + AsyncStorage both present = WARN, AsyncStorage alone (no secure-store) = FAIL.
@@ -82,15 +86,15 @@ Phase shape, so you know where you are:
 | D16–D17 | Store submission | `05-store-launch.md` | irreversible — AAB/IPA upload, double check before submit |
 | D18–D20 | Marketing launch | `06-marketing.md` | landing page, launch posts |
 
-Marketplace skills are NOT bundled by the installer — install separately when a phase needs one (`firecrawl-search` D1-2, `design-token-guardian`/`i18n-validator` D3+, `auth-assessment`/`secure-storage-audit`/`supabase-migrator` D4+, `qa-tester` D13-15, `store-metadata-reviewer` D15, `marketing-copywriter`/`viral-content-strategist` D17-18, `privacy-audit` post-D20). If a slash command 404s, this is why — go install it first.
+Marketplace skills are NOT bundled by the rn-harness plugin — install separately when a phase needs one (`firecrawl-search` D1-2, `design-token-guardian`/`i18n-validator` D3+, `auth-assessment`/`secure-storage-audit`/`supabase-migrator` D4+, `qa-tester` D13-15, `store-metadata-reviewer` D15, `marketing-copywriter`/`viral-content-strategist` D17-18, `privacy-audit` post-D20). If a slash command 404s, this is why — go install it first.
 
 ---
 
 ## 4. Known sharp edges (don't re-debug these)
 
 - **"FTA ≥ 60"** (quality gate, D11-13) — FTA = code complexity score from the `fta` tool; the rule is "never raise the ceiling to make a failing check pass, fix the code instead."
-- **`/new-rn-project` has no `--force` flag** — don't confuse with `install.sh --force` (real, but only re-installs templates globally). To re-run the wizard on a dir it already touched: delete `CLAUDE.md` manually first, per README FAQ.
-- **Destructive-op blocking** (`.claude/settings.json` + `.claude/hooks/pre-tool-use.sh`) — to allow a currently-blocked pattern (e.g. a specific `git push --force`), edit `.claude/hooks/pre-tool-use.sh` directly in your project, not the installer.
+- **`/rn-harness:new-rn-project` has no `--force` flag** — to re-run the wizard on a dir it already touched: delete `CLAUDE.md` manually first, per README FAQ.
+- **Destructive-op blocking** (`.claude/settings.json` + `.claude/hooks/pre-tool-use.sh`) — to allow a currently-blocked pattern (e.g. a specific `git push --force`), edit `.claude/hooks/pre-tool-use.sh` directly in your project, not the plugin's copy.
 - **Windows** — hooks are `.sh`, run via Git Bash. If you're on WSL instead, no documented fallback yet — test before relying on hooks.
 
 ---

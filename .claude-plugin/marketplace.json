@@ -1,0 +1,15 @@
+{
+  "name": "rn-harness",
+  "description": "Self-hosted marketplace for the rn-harness plugin.",
+  "owner": {
+    "name": "Bruno Moura",
+    "url": "https://github.com/Jujubalandia"
+  },
+  "plugins": [
+    {
+      "name": "rn-harness",
+      "source": "./",
+      "description": "Ship a React Native app to the App Store + Play Store in <=20 days: /new-rn-project wizard, /rn-doctor 24-check health check, git hook quality profiles, Claude Code safety configs."
+    }
+  ]
+}
