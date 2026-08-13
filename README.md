@@ -18,7 +18,7 @@ A set of templates, skills, and hooks that standardize the full flow:
 Spec → UX → Dev → QA → Store → Marketing
 ```
 
-The core is the `/new-rn-project` skill: open a directory (new or existing), type the command, and Claude automatically detects the stack via `package.json`, configures the project, and creates the full structure — filled CLAUDE.md, docs/, git hooks from the selected profile, and selective knowledge rules.
+The core is the `/rn-harness:new-rn-project` skill: open a directory (new or existing), type the command, and Claude automatically detects the stack via `package.json`, configures the project, and creates the full structure — filled CLAUDE.md, docs/, git hooks from the selected profile, and selective knowledge rules.
 
 ---
 
@@ -35,39 +35,16 @@ The core is the `/new-rn-project` skill: open a directory (new or existing), typ
 
 ## Installation
 
-Pick the subsection for your OS. Both install to the same layout — only the shell and paths differ.
+Installed as a Claude Code plugin — same commands on every OS, no clone, no shell script.
 
-### Linux / macOS / WSL (Bash)
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Jujubalandia/rn-harness/main/install.sh | sh
+```
+/plugin marketplace add Jujubalandia/rn-harness
+/plugin install rn-harness@rn-harness
 ```
 
-Or manual clone (needed if the repo is private and the raw URL above 404s — requires SSH access):
+That's it. Skills, templates, doctor scripts, and hook profiles ship inside the plugin — nothing to place manually. `.sh` git hooks installed later work as-is via Git for Windows' built-in bash on Windows.
 
-```bash
-git clone git@github.com:Jujubalandia/rn-harness.git ~/.rn-harness
-~/.rn-harness/install.sh
-```
-
-### Windows (PowerShell)
-
-Requires PowerShell 5.1+ (pre-installed on Windows 10+) and Git for Windows. There's no curl one-liner for Windows — clone manually and run the installer:
-
-```powershell
-git clone git@github.com:Jujubalandia/rn-harness.git $env:USERPROFILE\.rn-harness
-& "$env:USERPROFILE\.rn-harness\install.ps1"
-```
-
-The `.sh` git hooks installed later work as-is via Git for Windows' built-in bash — no extra config needed. The `.ps1` files under `hooks/` are for manual PowerShell testing only.
-
-### What the installer places
-
-| | Linux / macOS / WSL | Windows |
-|---|---|---|
-| Templates | `~/.claude/templates/rn-20days/` | `$env:USERPROFILE\.claude\templates\rn-20days\` |
-| Skills (`new-rn-project`, `rn-doctor`) | `~/.claude/skills/` | `$env:USERPROFILE\.claude\skills\` |
-| Scripts (doctor, etc.) | `~/.rn-harness/scripts/` | `$env:USERPROFILE\.rn-harness\scripts\` |
+Update with `/plugin update rn-harness`, remove with `/plugin uninstall rn-harness`. See [Claude Code plugin docs](https://code.claude.com/docs/en/plugins) if `/plugin` commands are unfamiliar.
 
 ---
 
@@ -81,7 +58,7 @@ claude    # opens Claude Code
 In Claude Code:
 
 ```
-/new-rn-project
+/rn-harness:new-rn-project
 ```
 
 ### What the wizard does
@@ -123,21 +100,11 @@ Shows detection table and asks for confirmation before proceeding.
 
 24 project health checks. Runs on any existing project.
 
-```bash
-bash ~/.rn-harness/scripts/doctor.sh           # human-readable output
-bash ~/.rn-harness/scripts/doctor.sh --json    # JSON output (CI/scripts)
+```
+/rn-harness:rn-doctor
 ```
 
-PowerShell:
-```powershell
-& "$env:USERPROFILE\.rn-harness\scripts\doctor.ps1"
-& "$env:USERPROFILE\.rn-harness\scripts\doctor.ps1" -Json
-```
-
-Or via Claude Code skill (explains FAILs and runs fixes):
-```
-/rn-doctor
-```
+Explains each FAIL and runs the suggested fix after confirmation. The underlying scripts (`scripts/doctor.sh` / `.ps1`) ship inside the installed plugin — for CI or manual runs outside Claude Code, find the plugin's install path with `claude plugin list` and invoke the script directly, or pass `--json` for structured output.
 
 ### What it checks
 
@@ -168,7 +135,7 @@ Exit 0 = no FAILs (OK and WARN pass). Exit 1 = at least one FAIL.
 
 ### When to run
 
-- D1: right after `/new-rn-project`
+- D1: right after `/rn-harness:new-rn-project`
 - After cloning on a new machine
 - When pre-commit hook fails without a clear reason
 - Before `eas build --profile production`
@@ -181,7 +148,7 @@ Two complementary mechanisms block destructive operations before execution:
 
 ### `settings.json` — declarative allowlist/denylist
 
-Created at `.claude/settings.json` by `/new-rn-project`. Blocks without prompt:
+Created at `.claude/settings.json` by `/rn-harness:new-rn-project`. Blocks without prompt:
 
 ```json
 { "permissions": { "deny": [
@@ -204,13 +171,13 @@ Script executed by Claude Code before each tool call. Intercepts destructive pat
 
 Blocked patterns: `eas submit`, `supabase db reset`, `git push --force`, `git commit --no-verify`, `rm -rf /`, `git reset --hard`, `DROP TABLE`, `truncate cascade`, `npx expo publish`.
 
-Both files are copied by `/new-rn-project` from `~/.claude/templates/rn-20days/claude/`.
+Both files are copied by `/rn-harness:new-rn-project` from the plugin's own `templates/claude/` directory.
 
 ---
 
 ## Hook Profiles
 
-Three quality gate levels, selectable at install time:
+Three quality gate levels, selectable per project by the `/rn-harness:new-rn-project` wizard:
 
 | Profile | pre-commit | pre-push |
 |---------|-----------|---------|
@@ -218,36 +185,20 @@ Three quality gate levels, selectable at install time:
 | `standard` | typecheck + lint + format | quality:full + Android confirmation |
 | `strict` *(default)* | typecheck + lint + format + fta | quality:full + Android confirmation |
 
-**Install with a specific profile:**
+The wizard asks which profile to use, remembers your choice for next time (stored in the plugin's persistent data dir), and copies the corresponding hooks from `git-hooks/profiles/<profile>/` into the new project's `.githooks/`.
+
+**Switch profile on an existing project:** re-run `/rn-harness:new-rn-project` and pick a different profile when asked, or copy the hooks manually — find the plugin's install path with `claude plugin list`, then:
 
 ```bash
-~/.rn-harness/install.sh --profile minimal    # D1-D5: fast iteration
-~/.rn-harness/install.sh --profile standard   # no fta
-~/.rn-harness/install.sh --profile strict     # everything (default, recommended)
-```
-
-```powershell
-& "$env:USERPROFILE\.rn-harness\install.ps1" -Profile minimal
-& "$env:USERPROFILE\.rn-harness\install.ps1" -Profile standard
-& "$env:USERPROFILE\.rn-harness\install.ps1" -Profile strict
-```
-
-The profile is saved at `~/.rn-harness/.profile`. The `/new-rn-project` wizard reads this file and copies the corresponding hooks from `hooks/profiles/<profile>/` into the new project.
-
-**Switch profile on an existing project:**
-
-```bash
-~/.rn-harness/install.sh --profile strict     # updates .profile
-# then, in the project:
-cp ~/.rn-harness/hooks/profiles/strict/pre-commit.sh .githooks/pre-commit
-cp ~/.rn-harness/hooks/profiles/strict/pre-push.sh   .githooks/pre-push
+cp <plugin-path>/git-hooks/profiles/strict/pre-commit.sh .githooks/pre-commit
+cp <plugin-path>/git-hooks/profiles/strict/pre-push.sh   .githooks/pre-push
 ```
 
 ---
 
 ## Knowledge Rules
 
-15 `.md` files that Claude loads automatically based on files being edited (`globs`). Installed at `.claude/rules/` in each new project by `/new-rn-project`.
+15 `.md` files that Claude loads automatically based on files being edited (`globs`). Installed at `.claude/rules/` in each new project by `/rn-harness:new-rn-project`.
 
 **Rules are selective:** the wizard copies only those relevant to the detected stack. A project without Supabase won't get `supabase.md`. A project without expo-video won't get `expo-video.md`.
 
@@ -277,40 +228,28 @@ cp ~/.rn-harness/hooks/profiles/strict/pre-push.sh   .githooks/pre-push
 
 ## Windows Notes
 
-Extra PowerShell-specific details not already covered in Installation/Update/Uninstall above.
+Extra PowerShell-specific details not already covered in Installation above.
 
-### Test PowerShell suite
+### Test PowerShell suite (contributors)
+
+Run from a local clone of this repo:
 
 ```powershell
-powershell -File "$env:USERPROFILE\.rn-harness\tests\test.ps1"
+powershell -File tests\test.ps1
 ```
 
-### Environment variables (equivalents)
+### Environment variables
 
-| Bash | PowerShell |
-|------|-----------|
-| `RN_HARNESS_DIR` | `$env:RN_HARNESS_DIR` |
-| `CLAUDE_CONFIG_DIR` | `$env:CLAUDE_CONFIG_DIR` |
-| `HARNESS_REMOTE` | `$env:HARNESS_REMOTE` |
-| `HARNESS_CONFIRM` | `$env:HARNESS_CONFIRM` (uninstall without prompt) |
-| `HARNESS_ANDROID_OK` | `$env:HARNESS_ANDROID_OK` (pre-push without prompt) |
+| Variable | Effect |
+|----------|--------|
+| `HARNESS_ANDROID_OK` | `$env:HARNESS_ANDROID_OK` — skip the interactive "tested on physical Android?" prompt in the pre-push hook |
 
 ---
 
 ## Update
 
-### Linux / macOS / WSL (Bash)
-
-```bash
-~/.rn-harness/install.sh            # updates repo + templates, no overwrite of project files
-~/.rn-harness/install.sh --force    # force update of installed templates
 ```
-
-### Windows (PowerShell)
-
-```powershell
-& "$env:USERPROFILE\.rn-harness\install.ps1"          # updates repo + templates, no overwrite
-& "$env:USERPROFILE\.rn-harness\install.ps1" -Force   # force update of installed templates
+/plugin update rn-harness
 ```
 
 ---
@@ -319,41 +258,41 @@ powershell -File "$env:USERPROFILE\.rn-harness\tests\test.ps1"
 
 ```
 rn-harness/
-├── install.sh               ← main installer (bash)
-├── install.ps1              ← PowerShell installer
-├── uninstall.sh / .ps1      ← full cleanup
+├── .claude-plugin/
+│   ├── plugin.json           ← plugin manifest
+│   └── marketplace.json      ← self-hosted marketplace listing (source: "./")
 ├── scripts/
-│   ├── doctor.sh            ← 24 health checks (bash)
-│   └── doctor.ps1           ← 24 health checks (PowerShell)
+│   ├── doctor.sh              ← 24 health checks (bash)
+│   └── doctor.ps1             ← 24 health checks (PowerShell)
 ├── templates/
-│   ├── CLAUDE.md.tmpl       ← project template (with {{PLACEHOLDERS}})
-│   ├── DECISIONS.md.stub    ← initial ADR log
-│   ├── TODO.md.stub         ← initial backlog
+│   ├── CLAUDE.md.tmpl        ← project template (with {{PLACEHOLDERS}})
+│   ├── DECISIONS.md.stub     ← initial ADR log
+│   ├── TODO.md.stub          ← initial backlog
 │   ├── docs/
-│   │   ├── 01-spec.md       ← spec + market research (D1-D2)
-│   │   ├── 02-dev-plan.md   ← 20-day plan + milestones
+│   │   ├── 01-spec.md        ← spec + market research (D1-D2)
+│   │   ├── 02-dev-plan.md    ← 20-day plan + milestones
 │   │   ├── 03-quality-gates.md  ← quality pyramid
-│   │   ├── 04-testing.md    ← test tiers + device matrix
+│   │   ├── 04-testing.md     ← test tiers + device matrix
 │   │   ├── 05-store-launch.md   ← App Store + Play Store checklist
-│   │   └── 06-marketing.md  ← D-7→D+14 calendar
-│   ├── rules/               ← 15 knowledge rules (selectively copied)
+│   │   └── 06-marketing.md   ← D-7→D+14 calendar
+│   ├── rules/                ← 15 knowledge rules (selectively copied)
 │   └── claude/
-│       ├── settings.json        ← destructive ops denylist
+│       ├── settings.json         ← destructive ops denylist
 │       └── hooks/
-│           └── pre-tool-use.sh  ← runtime blocking by pattern
+│           └── pre-tool-use.sh   ← runtime blocking by pattern
 ├── skills/
-│   ├── new-rn-project/      ← wizard: init, stack detection, rules, hooks
-│   └── rn-doctor/           ← health check: 24 checks + fixes
-├── hooks/
-│   ├── pre-commit.sh / .ps1 ← strict (reference)
-│   ├── pre-push.sh / .ps1   ← strict (reference)
+│   ├── new-rn-project/       ← wizard: init, stack detection, rules, hooks
+│   └── rn-doctor/            ← health check: 24 checks + fixes
+├── git-hooks/
+│   ├── pre-commit.sh / .ps1  ← strict (reference)
+│   ├── pre-push.sh / .ps1    ← strict (reference)
 │   └── profiles/
-│       ├── minimal/         ← pre-commit: typecheck only
-│       ├── standard/        ← pre-commit: typecheck+lint+format
-│       └── strict/          ← pre-commit: +fta (default)
+│       ├── minimal/          ← pre-commit: typecheck only
+│       ├── standard/         ← pre-commit: typecheck+lint+format
+│       └── strict/           ← pre-commit: +fta (default)
 └── tests/
-    ├── test.sh              ← 164 checks (bash)
-    └── test.ps1             ← PowerShell equivalent
+    ├── test.sh               ← checks (bash)
+    └── test.ps1              ← PowerShell equivalent
 ```
 
 ---
@@ -398,12 +337,12 @@ Operational table: each command/step in the flow, which day it belongs to, its c
 |-----|---------|-----------------|------------------------------|----------------------------------|-----------|
 | D1 | `nvm install 20` | External | Node.js (machine) | Node 20 LTS active | install pnpm |
 | D1 | `npm i -g pnpm` | External | — | pnpm CLI available | install Claude Code |
-| D1 | `npm i -g @anthropic-ai/claude-code` | External | — | Claude Code CLI installed | run rn-harness installer |
-| D1 | `curl -fsSL .../install.sh \| sh` | External | remote rn-harness repo | `~/.claude/templates/rn-20days/`, `~/.claude/skills/{new-rn-project,rn-doctor}`, `~/.rn-harness/scripts/`, `~/.rn-harness/.profile` | create project folder |
+| D1 | `npm i -g @anthropic-ai/claude-code` | External | — | Claude Code CLI installed | install rn-harness plugin |
+| D1 | `/plugin marketplace add Jujubalandia/rn-harness` + `/plugin install rn-harness@rn-harness` | External | remote rn-harness repo | plugin installed (skills, templates, scripts, git-hooks bundled inside) | create project folder |
 | D1 | `mkdir ~/projects/my-app && cd ...` | External | filesystem | project directory | open Claude Code |
 | D1 | `claude` | External | — | Claude Code session open | run wizard |
-| D1 | `/new-rn-project` | Skill | `package.json` (if present) | `CLAUDE.md`, `DECISIONS.md`, `TODO.md`, `docs/01-spec.md`…`06-marketing.md`, `.githooks/`, `.claude/rules/`, `.claude/settings.json`, `.claude/hooks/pre-tool-use.sh` | run `/rn-doctor` |
-| D1 | `/rn-doctor` | Skill | CLAUDE.md, package.json, tsconfig.json, .env*, .git/, app.json, eas.json | 24-check report (OK/WARN/FAIL) | fix reported FAILs |
+| D1 | `/rn-harness:new-rn-project` | Skill | `package.json` (if present) | `CLAUDE.md`, `DECISIONS.md`, `TODO.md`, `docs/01-spec.md`…`06-marketing.md`, `.githooks/`, `.claude/rules/`, `.claude/settings.json`, `.claude/hooks/pre-tool-use.sh` | run `/rn-harness:rn-doctor` |
+| D1 | `/rn-harness:rn-doctor` | Skill | CLAUDE.md, package.json, tsconfig.json, .env*, .git/, app.json, eas.json | 24-check report (OK/WARN/FAIL) | fix reported FAILs |
 | D1 | Fill prep checklist (problem, audience, competitors, differentiator, cut/keep, monetization, viral loop, risks) | Manual Edit | `docs/01-spec.md` (empty) | `docs/01-spec.md` with draft answers | research competitors (D2) |
 | D1 | `npx expo install --fix` | External | package.json / node_modules | versions compatible w/ SDK 56 | fix remaining doctor FAILs |
 | D2 | `/firecrawl-search` | Skill (marketplace) | search query | list of competitors | pick top 3 |
@@ -450,7 +389,7 @@ Operational table: each command/step in the flow, which day it belongs to, its c
 | D15 | Fill store metadata | Manual Edit | `docs/05-store-launch.md` | complete metadata | publish privacy policy |
 | D15 | Publish Privacy Policy (URL) | External | privacy policy page | public URL | run store-metadata-reviewer |
 | D15 | `store-metadata-reviewer` | Skill (subagent) | metadata + screenshots | compliance report | fix findings |
-| D15 | `/rn-doctor` (before final build) | Skill | project (24 checks) | report with no FAILs | validate DoD D15 |
+| D15 | `/rn-harness:rn-doctor` (before final build) | Skill | project (24 checks) | report with no FAILs | validate DoD D15 |
 | D15 | Confirm DoD D15 / Milestone M4 | External (manual) | production build installed | **DoD D15 / Milestone M4 confirmed:** production build installed on physical Android, no crash on Golden Paths | start D16 |
 | D16 | Upload AAB → internal track (Google Play Console) | External (irreversible) | production AAB | release on internal track | promote to production |
 | D16 | Promote release to production (Google Play) | External (irreversible) | internal track release | app in review on Play Store | answer compliance |
@@ -472,7 +411,7 @@ Operational table: each command/step in the flow, which day it belongs to, its c
 
 | Phase | Trigger | Skill | How to invoke |
 |-------|---------|-------|---------------|
-| D1 | After `/new-rn-project` or clone on new machine | `rn-doctor` | `/rn-doctor` |
+| D1 | After `/rn-harness:new-rn-project` or clone on new machine | `rn-doctor` | `/rn-harness:rn-doctor` |
 | D1-D2 | Competitor research | `firecrawl-search` | `/firecrawl-search` |
 | D1-D2 | Scrape competitor page | `firecrawl-scrape` | `/firecrawl-scrape` |
 | D3+ | New screen with hardcoded colors | `design-token-guardian` | subagent |
@@ -484,7 +423,7 @@ Operational table: each command/step in the flow, which day it belongs to, its c
 | Pre-commit | Any diff | `code-review` | `/code-review` |
 | D13-D15 | Complete feature for QA | `qa-tester` | subagent |
 | D15 | App Store/Play metadata | `store-metadata-reviewer` | subagent |
-| D15 | Before production build | `rn-doctor` | `/rn-doctor` |
+| D15 | Before production build | `rn-doctor` | `/rn-harness:rn-doctor` |
 | D17 | Post copy per platform | `marketing-copywriter` | subagent |
 | D18 | Viral concept | `viral-content-strategist` | subagent |
 | Post-D20 | Privacy audit | `privacy-audit` | `/privacy-audit` |
@@ -528,7 +467,7 @@ Pre-commit blocks based on the **active profile** (see Hook Profiles):
 
 Before push (all profiles): `pnpm quality:full` (typecheck + lint + format + fta + tests).
 
-Before production build: `pnpm preflight` + manual Golden Paths (5 critical flows, defined in `docs/03-quality-gates.md`) + `/rn-doctor` with no FAILs.
+Before production build: `pnpm preflight` + manual Golden Paths (5 critical flows, defined in `docs/03-quality-gates.md`) + `/rn-harness:rn-doctor` with no FAILs.
 
 **FTA ≥ 60?** Refactor: extract sub-components, custom hooks, lookup tables. **Never** raise the score_cap.
 
@@ -552,21 +491,16 @@ Before production build: `pnpm preflight` + manual Golden Paths (5 critical flow
 ## FAQ
 
 **How to start a project without overwriting existing files?**
-`/new-rn-project` checks each file before creating. Existing ones are skipped with a warning.
+`/rn-harness:new-rn-project` checks each file before creating. Existing ones are skipped with a warning.
 
 **How to force overwrite a file?**
-Delete it manually and run `/new-rn-project` again, or edit directly.
+Delete it manually and run `/rn-harness:new-rn-project` again, or edit directly.
 
 **Are all knowledge rules always copied?**
-No — they're selective. The wizard copies only those relevant to the detected stack. A project without Supabase won't get `supabase.md`, without expo-video won't get `expo-video.md`. To get all 15: run `/new-rn-project` in a project without `package.json`.
+No — they're selective. The wizard copies only those relevant to the detected stack. A project without Supabase won't get `supabase.md`, without expo-video won't get `expo-video.md`. To get all 15: run `/rn-harness:new-rn-project` in a project without `package.json`.
 
 **How to change the hook profile after installing?**
-```bash
-~/.rn-harness/install.sh --profile minimal     # updates ~/.rn-harness/.profile
-# Copy hooks into existing project:
-cp ~/.rn-harness/hooks/profiles/minimal/pre-commit.sh .githooks/pre-commit
-cp ~/.rn-harness/hooks/profiles/minimal/pre-push.sh   .githooks/pre-push
-```
+Re-run `/rn-harness:new-rn-project` in the project and pick a different profile when asked — it updates `.githooks/` and remembers the choice for next time.
 
 **Can I use this without Supabase?**
 Yes — during stack detection the wizard won't copy `supabase.md` or suggest `@supabase/supabase-js`. Just confirm backend as "(none)" or Firebase.
@@ -575,10 +509,10 @@ Yes — during stack detection the wizard won't copy `supabase.md` or suggest `@
 Flow documented in `04-testing.md`: Appetize.io for smoke + borrowed iPhone for TestFlight. The wizard includes this instruction in TODO.md.
 
 **How to update the harness without breaking existing projects?**
-`install.sh` uses `cp -rn` (no-clobber). Existing projects are not affected.
+`/plugin update rn-harness` only touches the plugin's own installed files. Existing generated projects are not affected — templates and rules only apply to projects created *after* the update.
 
-**Does `/rn-doctor` modify files?**
-No — it only reads and reports. Fixes are suggested and executed only when invoked via `/rn-doctor` in Claude Code, with user confirmation.
+**Does `/rn-harness:rn-doctor` modify files?**
+No — it only reads and reports. Fixes are suggested and executed only when invoked via `/rn-harness:rn-doctor` in Claude Code, with user confirmation.
 
 **What is the D1→D20 Step-by-Step table?**
 It's the operational reference in the [D1→D20 Step-by-Step](#d1d20-step-by-step) section: one row per command/step across the full 20-day flow, tagged with day, classification (Internal Claude / External / Skill / Manual Edit), input/output artifacts, and next step.
@@ -586,7 +520,7 @@ It's the operational reference in the [D1→D20 Step-by-Step](#d1d20-step-by-ste
 **How does the PR workflow work (branch before main)?**
 Create a feature branch (`git checkout -b <name>`), commit there, push, and open a PR (`gh pr create`) for review before merging into `main`. Don't commit directly to `main`.
 
-**Is `/rn-doctor --json` reliable for CI?**
+**Is `/rn-harness:rn-doctor --json` reliable for CI?**
 Not yet — `tests/test.sh` currently has a known failing check ("doctor.sh --json nao produz JSON valido"). Treat `--json` output as unverified until that test passes; use the human-readable output for now.
 
 ---
@@ -594,10 +528,11 @@ Not yet — `tests/test.sh` currently has a known failing check ("doctor.sh --js
 ## Contributing
 
 Private repo. For improvements:
-1. Edit files in `~/.rn-harness/` (local clone)
+1. Clone the repo and edit files locally
 2. Run test suite: `bash tests/test.sh` (must finish with 0 failures)
-3. Test skill manually: `/new-rn-project` or `/rn-doctor` in a test project
-4. Commit and push
+3. Test skills against your local clone: `/plugin marketplace add /path/to/local/rn-harness` then `/plugin install rn-harness@rn-harness`, or `claude plugin validate .` to check the manifests without installing
+4. Test skill manually: `/rn-harness:new-rn-project` or `/rn-harness:rn-doctor` in a test project
+5. Commit and push
 
 Template and rule changes take effect in **future** created projects. Existing projects are not affected.
 
@@ -605,16 +540,8 @@ Template and rule changes take effect in **future** created projects. Existing p
 
 ## Uninstall
 
-### Linux / macOS / WSL (Bash)
-
-```bash
-~/.rn-harness/uninstall.sh
+```
+/plugin uninstall rn-harness
 ```
 
-### Windows (PowerShell)
-
-```powershell
-& "$env:USERPROFILE\.rn-harness\uninstall.ps1"
-```
-
-Both remove `templates/rn-20days/`, both skills (`new-rn-project` + `rn-doctor`), and the cloned repo (`~/.rn-harness` or `$env:USERPROFILE\.rn-harness`). Existing projects are not affected.
+Removes the plugin (skills, templates, scripts, git hook profiles). Existing generated projects are not affected.

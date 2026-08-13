@@ -106,7 +106,7 @@ if [ -d "$PROJECT_DIR/.claude/rules" ] && [ "$(ls -A "$PROJECT_DIR/.claude/rules
   RULE_COUNT=$(find "$PROJECT_DIR/.claude/rules" -name '*.md' | wc -l | tr -d ' ')
   _out OK 9 ".claude/rules/ presente ($RULE_COUNT rules)"
 else
-  _out WARN 9 ".claude/rules/ ausente (knowledge rules não instaladas)" "/new-rn-project ou copiar manualmente de ~/.claude/templates/rn-20days/rules/"
+  _out WARN 9 ".claude/rules/ ausente (knowledge rules não instaladas)" "/rn-harness:new-rn-project ou copiar manualmente do plugin (\$CLAUDE_PLUGIN_ROOT/templates/rules/)"
 fi
 
 # ── 10. Expo SDK 56 ───────────────────────────────────────────────────────────
@@ -205,7 +205,7 @@ if [ -f "$PKG" ]; then
   if [ -z "$MISSING_SCRIPTS" ]; then
     _out OK 16 "scripts pnpm: typecheck, lint, format:check, fta, quality:full — todos presentes"
   else
-    _out FAIL 16 "scripts pnpm ausentes:$MISSING_SCRIPTS" "Adicionar scripts em package.json (ver ~/.claude/templates/rn-20days/03-quality-gates.md)"
+    _out FAIL 16 "scripts pnpm ausentes:$MISSING_SCRIPTS" "Adicionar scripts em package.json (ver docs/03-quality-gates.md)"
   fi
 fi
 

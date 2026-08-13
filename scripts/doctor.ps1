@@ -108,7 +108,7 @@ if (Test-Path $rulesDir) { $ruleCount = (Get-ChildItem $rulesDir -Filter '*.md' 
 if ($ruleCount -gt 0) {
     Out-Check 9 "OK" ".claude\rules\ presente ($ruleCount rules)"
 } else {
-    Out-Check 9 "WARN" ".claude\rules\ ausente" "/new-rn-project ou copiar de ~/.claude/templates/rn-20days/rules/"
+    Out-Check 9 "WARN" ".claude\rules\ ausente" "/rn-harness:new-rn-project ou copiar manualmente do plugin (`$env:CLAUDE_PLUGIN_ROOT\templates\rules\)"
 }
 
 # 10. Expo SDK 56

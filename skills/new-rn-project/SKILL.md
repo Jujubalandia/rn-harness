@@ -5,7 +5,7 @@ description: Wizard interativo para inicializar um novo projeto React Native com
 
 # New RN Project — Wizard
 
-> Skill instalada em `~/.claude/skills/new-rn-project/` pelo `install.sh` do rn-harness.
+> Skill do plugin `rn-harness` — instalar via `/plugin marketplace add Jujubalandia/rn-harness` + `/plugin install rn-harness@rn-harness`.
 
 ## Quando invocar
 
@@ -135,7 +135,7 @@ Perguntar **somente o que não pode ser detectado automaticamente**:
 - **FOCO_PRINCIPAL**: diferencial ou viral hook (ex: "share card com IA", "gamification diária")
 - **IDIOMAS**: PT-BR / EN-US / ES-419 (mínimo PT-BR)
 - **MONETIZACAO**: freemium / IAP / ads / subscription / none
-- **HOOK_PROFILE**: ler de `~/.rn-harness/.profile` (gravado pelo install). Se arquivo existir, mostrar valor e perguntar se quer manter ou trocar. Se não existir, default `strict`.
+- **HOOK_PROFILE**: ler de `${CLAUDE_PLUGIN_DATA}/.profile`. Se arquivo existir, mostrar valor e perguntar se quer manter ou trocar. Se não existir, default `strict`. Ao final do Passo 5, gravar o perfil escolhido de volta em `${CLAUDE_PLUGIN_DATA}/.profile` (criar o diretório se necessário) para lembrar da escolha no próximo projeto.
   - `minimal` — typecheck apenas (D1-D5, iteração rápida)
   - `standard` — typecheck + lint + format + quality:full no push
   - `strict` — tudo + fta (score-cap 60) — padrão para code freeze
@@ -169,7 +169,7 @@ Mostrar tabela: ferramenta | status (OK/FALTA/opcional) | comando de instalaçã
 
 Para cada arquivo abaixo, checar se existe antes de criar:
 
-**A. `CLAUDE.md`** — de `~/.claude/templates/rn-20days/CLAUDE.md.tmpl`
+**A. `CLAUDE.md`** — de `${CLAUDE_PLUGIN_ROOT}/templates/CLAUDE.md.tmpl`
 
 Substituir todos os `{{PLACEHOLDERS}}`:
 
@@ -187,34 +187,34 @@ Substituir todos os `{{PLACEHOLDERS}}`:
 | `{{SHELL — ex: PowerShell Windows, bash WSL}}` | detectar ou perguntar |
 | `{{DOMINIO}}` | derivado do APP_NAME |
 
-**B. `DECISIONS.md`** — de `~/.claude/templates/rn-20days/DECISIONS.md.stub`
+**B. `DECISIONS.md`** — de `${CLAUDE_PLUGIN_ROOT}/templates/DECISIONS.md.stub`
 Substituir: `{{APP_NAME}}`, `{{DATA_INICIO}}`
 
-**C. `TODO.md`** — de `~/.claude/templates/rn-20days/TODO.md.stub`
+**C. `TODO.md`** — de `${CLAUDE_PLUGIN_ROOT}/templates/TODO.md.stub`
 Substituir: `{{APP_NAME}}`, `{{DATA_INICIO}}`
 Deixar `{{FEATURE_1}}`, `{{FEATURE_2}}`, `{{FEATURE_3}}` — usuario preenche em D3
 
-**D. `docs/` (6 arquivos)** — copiar de `~/.claude/templates/rn-20days/docs/`
+**D. `docs/` (6 arquivos)** — copiar de `${CLAUDE_PLUGIN_ROOT}/templates/docs/`
 Criar `docs/` se nao existir. Copiar sem substituicao.
 
-**E. `.githooks/pre-commit`** — de `~/.rn-harness/hooks/pre-commit.sh`
-**F. `.githooks/pre-push`** — de `~/.rn-harness/hooks/pre-push.sh`
+**E. `.githooks/pre-commit`** — de `${CLAUDE_PLUGIN_ROOT}/git-hooks/pre-commit.sh`
+**F. `.githooks/pre-push`** — de `${CLAUDE_PLUGIN_ROOT}/git-hooks/pre-push.sh`
 
-**G. `.claude/settings.json`** — de `~/.claude/templates/rn-20days/claude/settings.json`
+**G. `.claude/settings.json`** — de `${CLAUDE_PLUGIN_ROOT}/templates/claude/settings.json`
 
 Bloqueia operações destrutivas (eas submit, db reset, force push, --no-verify).
 Criar apenas se `.claude/settings.json` não existir.
 
-**H. `.claude/hooks/pre-tool-use.sh`** — de `~/.claude/templates/rn-20days/claude/hooks/pre-tool-use.sh`
+**H. `.claude/hooks/pre-tool-use.sh`** — de `${CLAUDE_PLUGIN_ROOT}/templates/claude/hooks/pre-tool-use.sh`
 
 ```bash
 mkdir -p .claude/hooks
-cp ~/.claude/templates/rn-20days/claude/settings.json .claude/settings.json
-cp ~/.claude/templates/rn-20days/claude/hooks/pre-tool-use.sh .claude/hooks/pre-tool-use.sh
+cp "${CLAUDE_PLUGIN_ROOT}/templates/claude/settings.json" .claude/settings.json
+cp "${CLAUDE_PLUGIN_ROOT}/templates/claude/hooks/pre-tool-use.sh" .claude/hooks/pre-tool-use.sh
 chmod +x .claude/hooks/pre-tool-use.sh
 ```
 
-**I. `.claude/rules/`** — copiar de `~/.claude/templates/rn-20days/rules/`
+**I. `.claude/rules/`** — copiar de `${CLAUDE_PLUGIN_ROOT}/templates/rules/`
 
 Criar `.claude/rules/` e copiar **seletivamente** com base na stack detectada:
 
@@ -245,14 +245,18 @@ Se projeto novo (sem package.json): copiar **todos os 15** como base.
 ```bash
 mkdir -p .githooks .claude/rules
 
-# Ler perfil do harness (default strict)
-HOOK_PROFILE=$(cat ~/.rn-harness/.profile 2>/dev/null || echo "strict")
+# Ler perfil (default strict) — ver HOOK_PROFILE no Passo 2
+HOOK_PROFILE="${HOOK_PROFILE:-strict}"
 
 # Copiar hooks do perfil selecionado
-cp ~/.rn-harness/hooks/profiles/$HOOK_PROFILE/pre-commit.sh .githooks/pre-commit
-cp ~/.rn-harness/hooks/profiles/$HOOK_PROFILE/pre-push.sh   .githooks/pre-push
+cp "${CLAUDE_PLUGIN_ROOT}/git-hooks/profiles/$HOOK_PROFILE/pre-commit.sh" .githooks/pre-commit
+cp "${CLAUDE_PLUGIN_ROOT}/git-hooks/profiles/$HOOK_PROFILE/pre-push.sh"   .githooks/pre-push
 chmod +x .githooks/pre-commit .githooks/pre-push
 git config core.hooksPath .githooks
+
+# Lembrar a escolha para o proximo projeto
+mkdir -p "${CLAUDE_PLUGIN_DATA}"
+echo "$HOOK_PROFILE" > "${CLAUDE_PLUGIN_DATA}/.profile"
 # Rules ja copiadas no Passo 4G
 ```
 
@@ -332,11 +336,12 @@ Se qualquer arquivo ja existir:
 
 ## Referencia de templates
 
-Todos os templates estao em `~/.claude/templates/rn-20days/` (instalados pelo `install.sh` do rn-harness).
+Todos os templates estao em `${CLAUDE_PLUGIN_ROOT}/templates/` (parte do plugin `rn-harness`, sem etapa de instalacao separada).
 
-Se os templates nao existirem (harness nao instalado):
+Se `${CLAUDE_PLUGIN_ROOT}` estiver vazio ou os templates nao existirem (plugin nao instalado):
 ```
-ERRO: Templates nao encontrados em ~/.claude/templates/rn-20days/
-   Instalar o rn-harness primeiro:
-   curl -fsSL https://raw.githubusercontent.com/Jujubalandia/rn-harness/main/install.sh | sh
+ERRO: Plugin rn-harness nao encontrado.
+   Instalar primeiro:
+   /plugin marketplace add Jujubalandia/rn-harness
+   /plugin install rn-harness@rn-harness
 ```

@@ -5,7 +5,7 @@ description: Health check de projeto React Native. Roda 24 verificações (ambie
 
 # rn-doctor — Health Check (24 checks)
 
-> Skill instalada em `~/.claude/skills/rn-doctor/` pelo `install.sh` do rn-harness.
+> Skill do plugin `rn-harness` — instalar via `/plugin marketplace add Jujubalandia/rn-harness` + `/plugin install rn-harness@rn-harness`.
 
 ## Quando invocar
 
@@ -20,17 +20,17 @@ description: Health check de projeto React Native. Roda 24 verificações (ambie
 ### 1. Rodar o script
 
 ```bash
-bash ~/.rn-harness/scripts/doctor.sh
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.sh"
 ```
 
 PowerShell (Windows):
 ```powershell
-& "$env:USERPROFILE\.rn-harness\scripts\doctor.ps1"
+& "${CLAUDE_PLUGIN_ROOT}\scripts\doctor.ps1"
 ```
 
 Ou com `--json` para output estruturado:
 ```bash
-bash ~/.rn-harness/scripts/doctor.sh --json
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.sh" --json
 ```
 
 ### 2. Interpretar resultado
@@ -136,8 +136,8 @@ module.exports = function(api) {
 
 ```bash
 mkdir -p .githooks
-cp ~/.rn-harness/hooks/profiles/strict/pre-commit.sh .githooks/pre-commit
-cp ~/.rn-harness/hooks/profiles/strict/pre-push.sh   .githooks/pre-push
+cp "${CLAUDE_PLUGIN_ROOT}/git-hooks/profiles/strict/pre-commit.sh" .githooks/pre-commit
+cp "${CLAUDE_PLUGIN_ROOT}/git-hooks/profiles/strict/pre-push.sh"   .githooks/pre-push
 chmod +x .githooks/pre-commit .githooks/pre-push
 git config core.hooksPath .githooks
 ```
@@ -181,6 +181,6 @@ import { useAudioPlayer } from 'expo-audio';
 ## Referência dos scripts
 
 ```
-~/.rn-harness/scripts/doctor.sh   ← bash (Linux/macOS/WSL)
-~/.rn-harness/scripts/doctor.ps1  ← PowerShell 5.1+ (Windows)
+${CLAUDE_PLUGIN_ROOT}/scripts/doctor.sh   ← bash (Linux/macOS/WSL)
+${CLAUDE_PLUGIN_ROOT}/scripts/doctor.ps1  ← PowerShell 5.1+ (Windows)
 ```
