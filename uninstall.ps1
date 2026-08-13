@@ -12,6 +12,7 @@ Write-Host ""
 Write-Host "Isso vai remover:"
 Write-Host "  - $ClaudeDir\templates\rn-20days\"
 Write-Host "  - $ClaudeDir\skills\new-rn-project\"
+Write-Host "  - $ClaudeDir\skills\rn-doctor\"
 Write-Host "  - $HarnessDir\"
 Write-Host ""
 
@@ -29,6 +30,7 @@ if ($confirm -notmatch '^[yY]$') {
 $targets = @(
     "$ClaudeDir\templates\rn-20days",
     "$ClaudeDir\skills\new-rn-project",
+    "$ClaudeDir\skills\rn-doctor",
     $HarnessDir
 )
 foreach ($t in $targets) {

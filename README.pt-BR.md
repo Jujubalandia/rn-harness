@@ -33,21 +33,39 @@ O coração é a skill `/new-rn-project`: você abre um diretório (novo ou exis
 
 ## Instalação
 
+Escolha a subseção do seu SO. Ambas instalam a mesma estrutura — só mudam o shell e os caminhos.
+
+### Linux / macOS / WSL (Bash)
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Jujubalandia/rn-harness/main/install.sh | sh
 ```
 
-Ou manual (repo privado — requer acesso SSH):
+Ou clone manual (necessário se o repo for privado e a URL raw acima der 404 — requer acesso SSH):
 
 ```bash
 git clone git@github.com:Jujubalandia/rn-harness.git ~/.rn-harness
 ~/.rn-harness/install.sh
 ```
 
-O installer coloca:
-- Templates em `~/.claude/templates/rn-20days/`
-- Skills `new-rn-project` e `rn-doctor` em `~/.claude/skills/`
-- Scripts (doctor, etc.) em `~/.rn-harness/scripts/`
+### Windows (PowerShell)
+
+Requer PowerShell 5.1+ (pré-instalado no Windows 10+) e Git for Windows. Não existe one-liner curl para Windows — clone manualmente e rode o installer:
+
+```powershell
+git clone git@github.com:Jujubalandia/rn-harness.git $env:USERPROFILE\.rn-harness
+& "$env:USERPROFILE\.rn-harness\install.ps1"
+```
+
+Os hooks `.sh` instalados depois funcionam direto via bash embutido do Git for Windows — nenhuma configuração extra. Os arquivos `.ps1` em `hooks/` servem só para teste manual no PowerShell.
+
+### O que o installer coloca
+
+| | Linux / macOS / WSL | Windows |
+|---|---|---|
+| Templates | `~/.claude/templates/rn-20days/` | `$env:USERPROFILE\.claude\templates\rn-20days\` |
+| Skills (`new-rn-project`, `rn-doctor`) | `~/.claude/skills/` | `$env:USERPROFILE\.claude\skills\` |
+| Scripts (doctor, etc.) | `~/.rn-harness/scripts/` | `$env:USERPROFILE\.rn-harness\scripts\` |
 
 ---
 
@@ -255,35 +273,9 @@ cp ~/.rn-harness/hooks/profiles/strict/pre-push.sh   .githooks/pre-push
 
 ---
 
-## Windows (PowerShell)
+## Notas Windows
 
-Requer PowerShell 5.1+ (pré-instalado no Windows 10+) e Git for Windows.
-
-### Instalação
-
-```powershell
-# Clone manual (repo privado — requer acesso SSH):
-git clone git@github.com:Jujubalandia/rn-harness.git $env:USERPROFILE\.rn-harness
-& "$env:USERPROFILE\.rn-harness\install.ps1"
-```
-
-### Atualizar
-
-```powershell
-& "$env:USERPROFILE\.rn-harness\install.ps1"          # sem sobrescrever
-& "$env:USERPROFILE\.rn-harness\install.ps1" -Force   # forca update dos templates
-```
-
-### Desinstalar
-
-```powershell
-& "$env:USERPROFILE\.rn-harness\uninstall.ps1"
-```
-
-### Git hooks no Windows
-
-Os hooks `.sh` funcionam via Git for Windows (bash embutido) — nenhuma configuração extra.
-Os `.ps1` em `hooks/` servem para testes e invocação manual no PowerShell.
+Detalhes extras específicos de PowerShell não cobertos nas seções Instalação/Atualizar/Desinstalar acima.
 
 ### Testar suite PowerShell
 
@@ -305,12 +297,18 @@ powershell -File "$env:USERPROFILE\.rn-harness\tests\test.ps1"
 
 ## Atualizar
 
-```bash
-# Atualiza o repo e os templates locais (sem sobrescrever arquivos de projeto)
-~/.rn-harness/install.sh
+### Linux / macOS / WSL (Bash)
 
-# Força atualização dos templates instalados
-~/.rn-harness/install.sh --force
+```bash
+~/.rn-harness/install.sh            # atualiza repo + templates, sem sobrescrever arquivos de projeto
+~/.rn-harness/install.sh --force    # força atualização dos templates instalados
+```
+
+### Windows (PowerShell)
+
+```powershell
+& "$env:USERPROFILE\.rn-harness\install.ps1"          # atualiza repo + templates, sem sobrescrever
+& "$env:USERPROFILE\.rn-harness\install.ps1" -Force   # força atualização dos templates instalados
 ```
 
 ---
@@ -408,14 +406,14 @@ Tabela operacional: cada comando/passo do fluxo, o dia a que pertence, sua class
 | D1 | `npx expo install --fix` | Externo | package.json / node_modules | versões compatíveis c/ SDK 56 | corrigir FAILs restantes |
 | D2 | `/firecrawl-search` | Skill (marketplace) | query de busca | lista de concorrentes | escolher top 3 |
 | D2 | `/firecrawl-scrape` | Skill (marketplace) | URL do concorrente | conteúdo extraído | preencher tabela de concorrentes |
-| D2 | Preencher concorrentes + Cut/Keep + diff + viral loop | Edição | `docs/01-spec.md` | `docs/01-spec.md` completo (DoD D1-D2) | aprovar spec, seguir p/ D3 |
+| D2 | Preencher concorrentes + Cut/Keep + diff + viral loop | Edição | `docs/01-spec.md` | `docs/01-spec.md` completo (pronto para aprovar antes de D3 — não é DoD/Milestone formal) | aprovar spec, seguir p/ D3 |
 | D3 | Definir design system (cores, tipografia, grid 8pt) | Edição | `docs/01-spec.md` | seção design system preenchida | mapear fluxo de telas |
 | D3 | Mapear fluxo de telas (texto) | Edição | `docs/01-spec.md` | fluxo documentado | criar projeto Expo + Supabase |
 | D3 | `npx create-expo-app` + config Supabase | Externo | filesystem / dashboard Supabase | projeto Expo + client Supabase configurados | implementar auth |
 | D3 | Implementar auth (Google/Apple/email) | Interno Claude | arquivos de auth/hooks | login funcional | implementar navegação |
 | D3 | `design-token-guardian` (antes de commitar estilos) | Skill (subagente) | arquivos de estilo/tela nova | flag de cores hardcoded | corrigir, commit |
 | D3 | Implementar navegação entre telas | Interno Claude | arquivos de rota | 2+ telas navegáveis | validar DoD D3 |
-| D3 | Testar no Android físico (login + nav) | Externo (manual) | build dev no device | DoD D3 / Milestone M1 confirmado | iniciar D4 |
+| D3 | Testar no Android físico (login + nav) | Externo (manual) | build dev no device | **DoD D3 / Milestone M1 confirmado:** app abre no Android físico, login funciona, 2+ telas navegáveis | iniciar D4 |
 | D4 | Implementar feature core 1 | Interno Claude | código da feature | feature 1 funcional | `/code-review` |
 | D4 | `/code-review` | Skill (marketplace) | diff feature 1 | relatório de findings | corrigir, commit |
 | D5 | Implementar feature core 2 | Interno Claude | código da feature | feature 2 funcional | `/code-review` |
@@ -424,6 +422,7 @@ Tabela operacional: cada comando/passo do fluxo, o dia a que pertence, sua class
 | D6 | `/code-review` | Skill | diff feature 3 | findings | corrigir, commit |
 | D7 | Implementar feature core 4 | Interno Claude | código da feature | feature 4 funcional | `/code-review` |
 | D7 | `/code-review` | Skill | diff feature 4 | findings | corrigir, commit |
+| D7 | Confirmar Milestone M2 (fluxo principal funcionalmente completo) | Externo (manual) | features core 1-4 funcionando | **Milestone M2 confirmado** | iniciar D8 |
 | D8 | Implementar feature core 5 | Interno Claude | código da feature | feature 5 funcional | `/code-review` |
 | D8 | `/code-review` | Skill | diff feature 5 | findings | corrigir, commit |
 | D9 | Implementar feature core 6 | Interno Claude | código da feature | feature 6 funcional | `/code-review` |
@@ -433,7 +432,7 @@ Tabela operacional: cada comando/passo do fluxo, o dia a que pertence, sua class
 | D4-D9 | `supabase-migrator` (nova migration) | Skill (subagente) | arquivo de migration SQL | migration revisada | aplicar no Supabase |
 | D4-D9 | `expo-debugger` (EAS build/Metro travado) | Skill (subagente) | logs de build/Metro | causa raiz + fix sugerido | aplicar fix, re-rodar |
 | D10 | Buffer/catchup de features atrasadas | Interno Claude / Edição | código pendente | features completas | testar fluxo e2e |
-| D10 | Testar fluxo principal ponta a ponta (Android físico) | Externo (manual) | build dev | DoD D10 / Milestone M3 confirmado | iniciar D11 |
+| D10 | Testar fluxo principal ponta a ponta (Android físico) | Externo (manual) | build dev | **DoD D10 / Milestone M3 confirmado:** usuário completa o fluxo principal do zero ao fim sem crash | iniciar D11 |
 | D11 | Completar i18n (PT-BR + idiomas extra) | Interno Claude | strings/telas | textos com `t()` | `i18n-validator` |
 | D11 | `i18n-validator` (texto sem `t()`) | Skill (subagente) | arquivos de tela | relatório de strings hardcoded | corrigir restantes |
 | D12 | Adicionar `accessibilityLabel` nos elementos interativos | Interno Claude | componentes de UI | a11y labels presentes | loading/error states |
@@ -442,7 +441,7 @@ Tabela operacional: cada comando/passo do fluxo, o dia a que pertence, sua class
 | D13 | Ajustar performance (bundle <3MB, TTI <2s) + splash/ícone | Interno Claude / Edição (assets) | bundle config, assets/icon.png | app otimizado + ícone/splash prontos | rodar quality gates |
 | D13 | `pnpm quality:full` | Externo | código do projeto | relatório zero erros (ou falhas) | corrigir falhas, preflight |
 | D13 | `pnpm preflight` | Externo | build de produção local | preflight OK | validar Golden Paths |
-| D13 | Validar Golden Paths GP-1..GP-5 (Android físico) | Externo (manual) | app no device | DoD D13 confirmado | iniciar D14 |
+| D13 | Validar Golden Paths GP-1..GP-5 (Android físico) | Externo (manual) | app no device | **DoD D13 confirmado:** `quality:full` zero erros, `preflight` passa, Golden Paths GP-1..GP-5 validados no Android físico | iniciar D14 |
 | D14 | `eas build --profile production` (Android + iOS) | Externo | eas.json / código | AAB/IPA de produção | testar Golden Paths na build prod |
 | D14 | Testar Golden Paths na build de produção | Externo (manual) | AAB/IPA instalado | validação sem crash | capturar screenshots |
 | D14 | Capturar screenshots para as lojas | Externo (manual) | app rodando | imagens p/ `05-store-launch.md` | preencher metadata |
@@ -450,20 +449,20 @@ Tabela operacional: cada comando/passo do fluxo, o dia a que pertence, sua class
 | D15 | Publicar Privacy Policy (URL) | Externo | página de privacy policy | URL pública | rodar store-metadata-reviewer |
 | D15 | `store-metadata-reviewer` | Skill (subagente) | metadata + screenshots | relatório de conformidade | corrigir apontamentos |
 | D15 | `/rn-doctor` (antes do build final) | Skill | projeto (24 checks) | relatório sem FAILs | validar DoD D15 |
-| D15 | Confirmar DoD D15 / Milestone M4 | Externo (manual) | build produção instalada | Milestone M4 confirmado | iniciar D16 |
+| D15 | Confirmar DoD D15 / Milestone M4 | Externo (manual) | build produção instalada | **DoD D15 / Milestone M4 confirmado:** build de produção instalada no Android físico, sem crash nos Golden Paths | iniciar D16 |
 | D16 | Upload AAB → internal track (Google Play Console) | Externo (irreversível) | AAB de produção | release no internal track | promover p/ produção |
 | D16 | Promover release p/ produção (Google Play) | Externo (irreversível) | release internal track | app em review na Play Store | responder compliance |
 | D17 | Xcode Archive → upload TestFlight | Externo (irreversível) | build iOS | build no TestFlight | submeter p/ review |
 | D17 | Submissão App Store (App Store Connect) | Externo (irreversível) | build TestFlight | app em review na App Store | responder compliance |
 | D17 | Responder compliance (ambas lojas) | Edição/Externo | formulários das lojas | compliance respondido | registrar build number |
-| D17 | Registrar build number/status em DECISIONS.md | Edição | `DECISIONS.md` | registro salvo (DoD D17, M5) | iniciar D18 |
+| D17 | Registrar build number/status em DECISIONS.md | Edição | `DECISIONS.md` | registro salvo — **DoD D17 / Milestone M5 confirmado:** ambas submissões confirmadas, build number registrado | iniciar D18 |
 | D18 | Publicar landing page (GitHub Pages/Vercel) | Externo | 1 página estática | landing page no ar | preparar posts |
 | D18 | `marketing-copywriter` | Skill (subagente) | briefing do app | copy por plataforma | revisar/agendar posts |
 | D18 | `viral-content-strategist` | Skill (subagente) | contexto do app/público | conceito de conteúdo viral | criar posts D-1/D0 |
 | D19 | Publicar posts D-1/D0 (Reddit, redes) | Externo (manual) | copy pronta | posts publicados | monitorar reação |
 | D20 | Criar listing Product Hunt | Externo (manual) | assets + copy | listing publicado | acompanhar métricas |
 | D20 | Publicar posts D+3/D+7 (agendados) | Externo (manual) | copy pronta | posts publicados | registrar métricas |
-| D20 | Registrar métricas D+7 em DECISIONS.md | Edição | `DECISIONS.md` | métricas registradas (DoD D20) | encerrar milestone / v1.1 |
+| D20 | Registrar métricas D+7 em DECISIONS.md | Edição | `DECISIONS.md` | métricas registradas — **DoD D20 confirmado:** app aprovado nas lojas, landing page no ar, ≥1 canal de marketing ativo | encerrar milestone / v1.1 |
 
 ---
 
@@ -604,8 +603,16 @@ Mudanças em templates e rules entram em vigor nos **próximos** projetos criado
 
 ## Desinstalar
 
+### Linux / macOS / WSL (Bash)
+
 ```bash
 ~/.rn-harness/uninstall.sh
 ```
 
-Remove templates, skills (`new-rn-project` + `rn-doctor`) e o repo clonado. Projetos existentes não são afetados.
+### Windows (PowerShell)
+
+```powershell
+& "$env:USERPROFILE\.rn-harness\uninstall.ps1"
+```
+
+Ambos removem `templates/rn-20days/`, os dois skills (`new-rn-project` + `rn-doctor`) e o repo clonado (`~/.rn-harness` ou `$env:USERPROFILE\.rn-harness`). Projetos existentes não são afetados.
