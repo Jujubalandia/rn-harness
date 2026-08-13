@@ -11,6 +11,7 @@ echo ""
 echo "Isso vai remover:"
 echo "  - $CLAUDE_DIR/templates/rn-20days/"
 echo "  - $CLAUDE_DIR/skills/new-rn-project/"
+echo "  - $CLAUDE_DIR/skills/rn-doctor/"
 echo "  - $HARNESS_DIR/"
 echo ""
 printf "Confirmar? [y/N] "
@@ -22,6 +23,7 @@ esac
 
 rm -rf "$CLAUDE_DIR/templates/rn-20days/"
 rm -rf "$CLAUDE_DIR/skills/new-rn-project/"
+rm -rf "$CLAUDE_DIR/skills/rn-doctor/"
 rm -rf "$HARNESS_DIR/"
 
 echo ""
